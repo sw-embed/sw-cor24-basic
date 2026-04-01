@@ -1,0 +1,243 @@
+You are setting up the sw-cor24-basic repository for AI-agent-driven
+development. This repo lives at ~/github/sw-embed/sw-cor24-basic/ and
+will contain a COR24 BASIC v1 interpreter.
+
+Read docs/research.txt thoroughly before proceeding. It contains all
+design decisions already made. Do not revisit or change them.
+
+== WHAT THIS PROJECT IS ==
+
+sw-cor24-basic implements "COR24 BASIC v1", a 1970s time-sharing-style,
+line-numbered, integer-only BASIC interpreter that runs on the COR24
+p-code virtual machine. Inspired by UNIVAC 1100-series terminal BASIC
+with teletype and paper-tape workflows.
+
+Key design decisions already locked in (from research.txt):
+- Line-numbered stored programs, tokenized on entry
+- Integer-only (signed 24-bit), no floating point in v1
+- Interactive: immediate mode + stored program mode (RUN)
+- Terminal/teletype oriented with paper-tape SAVE/LOAD
+- Runs on the p-code VM as a language layer, NOT compiled to p-code
+- Three-layer architecture:
+  - Layer 1: p-code VM (language-neutral substrate)
+  - Layer 2: BASIC runtime (I/O, line storage, stacks, PEEK/POKE)
+  - Layer 3: BASIC interpreter (tokenizer, parser, dispatch, execution)
+- Tokenized internal representation (keywords, operators, literals)
+- Recursive-descent expression parser (Pratt/precedence-climbing)
+- Statement dispatcher keyed on first token
+- Fixed-size tables and stacks (no GC, no heap in v1)
+- Scalar integer variables only (A-Z, optionally A0-Z9)
+- String literals for PRINT, no string variables in v1
+- Byte-oriented PEEK/POKE, word access (PEEKW/POKEW) later
+- Classic error messages (SYNTAX ERROR, WHAT?, etc.)
+- No BASIC-specific VM opcodes — only language-neutral VM primitives
+- Dialect name: "COR24 BASIC v1" (not "BASIC77", not "Tiny BASIC")
+
+v1 statements: LET, PRINT, INPUT, IF...THEN, GOTO, GOSUB, RETURN,
+FOR...TO...STEP, NEXT, STOP, END, REM
+v1 commands: LIST, RUN, NEW, SAVE, LOAD, BYE
+v1 functions: PEEK, POKE, ABS
+
+== P-CODE / VM / PASCAL ECOSYSTEM ==
+
+BASIC runs on the p-code VM. You MUST understand these sibling repos:
+
+- ~/github/sw-embed/sw-cor24-pcode/
+  The p-code VM implementation. This is the execution substrate for
+  BASIC. The VM owns the stack/call model, memory model, traps,
+  device access. BASIC is an interpreter RUNNING ON the VM, not
+  compiled to p-code. Understand the VM's instruction set, memory
+  layout, and syscall/trap mechanisms before designing BASIC's
+  runtime layer.
+
+- ~/github/sw-embed/sw-cor24-plsw/
+  Pascal-to-p-code compiler. Pascal already defines the p-code
+  instruction set. BASIC must work within those existing opcodes.
+  If interpreter-assisting operations are needed (byte load/store,
+  memcpy, indirect jump, generic syscall), they should be proposed
+  as language-neutral VM extensions useful to ALL languages, not
+  BASIC-specific additions.
+
+- ~/github/sw-embed/sw-cor24-pascal/
+  Pascal language support and runtime. Understanding the Pascal
+  runtime helps inform how BASIC's runtime should layer on the VM
+  without conflicting.
+
+- ~/github/sw-embed/sw-cor24-x-pc-aotc/
+  AOT compiler translating p-code to native COR24 assembly. Relevant
+  because BASIC's runtime code may eventually benefit from AOT
+  compilation of hot paths.
+
+- ~/github/sw-embed/sw-cor24-emulator/
+  The COR24 emulator. All testing runs here. Understand how to load
+  and run p-code programs on the emulator.
+
+== YOUR TASKS ==
+
+IMPORTANT: Do NOT create the agentrail saga yet. You must first
+produce documentation and get user feedback.
+
+1. Read docs/research.txt completely. Extract all architectural
+   decisions, dialect specifications, layering model, tokenizer
+   design, execution model, and phased milestones.
+
+2. Read the p-code VM repo (sw-cor24-pcode) to understand:
+   - The existing p-code instruction set
+   - Memory model and addressing
+   - Stack/frame layout
+   - Trap/error mechanisms
+   - Device/host I/O primitives
+   - What interpreter-friendly primitives already exist vs. what
+     may need to be proposed as extensions
+
+3. Create docs/prd.md (Product Requirements Document):
+   - Problem statement: need an interactive language for hardware
+     bring-up, monitor scripting, and VM validation alongside Pascal
+   - Target users: developers working with COR24 hardware/emulator
+   - Functional requirements:
+     - Interactive REPL with immediate and program modes
+     - Line-numbered program storage with tokenization
+     - Integer arithmetic expressions with precedence
+     - Control flow (IF/GOTO/GOSUB/FOR)
+     - Terminal I/O (PRINT/INPUT)
+     - Hardware access (PEEK/POKE)
+     - Paper-tape style SAVE/LOAD
+     - Classic error reporting
+   - Non-functional requirements:
+     - Runs on p-code VM (not native COR24)
+     - Fixed-size memory, no GC
+     - Educational clarity over performance
+     - Debugger-friendly design
+   - Out of scope (v1): floating point, arrays, string variables,
+     multi-statement lines (:), file I/O beyond tape, DATA/READ,
+     ON...GOTO, user-defined functions
+
+4. Create docs/architecture.md:
+   - Three-layer diagram: VM -> BASIC runtime -> interpreter
+   - How BASIC maps onto p-code VM execution
+   - Memory layout within the VM: program area, variable table,
+     GOSUB stack, FOR stack, token buffer, string pool, input buffer
+   - Token format and encoding scheme
+   - Program storage: packed sorted buffer of tokenized lines
+   - Execution flow: REPL loop, immediate vs stored execution
+   - Interaction with VM traps, syscalls, device I/O
+   - Module breakdown: basic_lex, basic_tokens, basic_store,
+     basic_expr, basic_stmt, basic_exec, basic_runtime, basic_errors,
+     basic_repl
+
+5. Create docs/design.md:
+   - Tokenizer specification: keyword tokens, operator tokens,
+     literal encoding, string literal storage
+   - Expression parser: Pratt/precedence-climbing approach,
+     operator precedence table, unary operators
+   - Statement dispatch: switch on first token pattern
+   - Variable model: A-Z scalars, optional A0-Z9 extension
+   - PEEK/POKE: byte-oriented, address validation, VM memory mapping
+   - Paper-tape model: console device vs tape device abstraction,
+     SAVE/LOAD format (plain text BASIC source)
+   - Error handling: user-facing messages + internal debug codes
+   - Runtime state: InterpreterState structure (parallel arrays
+     since no structs in some implementation paths)
+   - GOSUB stack and FOR stack design
+   - VM extension candidates: which primitives are needed and which
+     already exist (byte load/store, memcpy, traps, indirect jump,
+     generic syscall)
+
+6. Create docs/plan.md:
+   - Implementation phases derived from research.txt milestones:
+     Phase 1: Language/runtime spec documents
+     Phase 2: Tokenizer and program store
+     Phase 3: Immediate-mode evaluator (PRINT, assignment, PEEK, POKE)
+     Phase 4: Stored program (LIST, RUN, NEW, line editing)
+     Phase 5: Program runner (GOTO, IF...THEN, END)
+     Phase 6: Subroutines and loops (GOSUB/RETURN, FOR/NEXT)
+     Phase 7: Strings and console polish
+     Phase 8: Paper-tape SAVE/LOAD
+     Phase 9: Hardware demos and validation
+   - Testing strategy: test programs from research.txt (hello world,
+     count loop, LED blink, UART poll)
+   - Dependency on VM capabilities — identify what must be verified
+     or extended in sw-cor24-pcode before BASIC can proceed
+   - Implementation language decision tree (Pascal vs p-code assembly
+     vs host prototype first)
+
+7. ASK THE USER QUESTIONS:
+   After creating the four docs above, present a numbered list of
+   questions to the user about ambiguities, gaps, or decisions that
+   need confirmation. Examples of things to ask about:
+
+   - Implementation language: Should Phase A (host prototype in
+     Rust/C) happen first, or go directly to p-code implementation?
+     If p-code, Pascal or p-code assembly?
+   - VM extensions: After reading sw-cor24-pcode, which of these
+     are already available and which need to be added?
+     - Byte load/store (LOADB/STOREB)
+     - Block copy/fill (MEMCPY/MEMSET)
+     - Indirect jump/call (JMP_IND/CALL_IND)
+     - Generic trap mechanism
+     - Generic syscall/host-call gateway
+   - Tape abstraction: filename-based (SAVE "FOO") or device-based
+     (ATTACH READER, LOAD)?
+   - Variable naming: strictly A-Z (26 vars) or extended A0-Z9?
+   - String support scope: string literals in PRINT only, or also
+     INPUT with string prompts?
+   - PEEK/POKE addressing: against VM-visible address space or
+     underlying COR24 physical memory?
+   - Error recovery: STOP+CONT support in v1 or defer?
+   - Interaction with sw-cor24-monitor: does BASIC run standalone
+     on the VM, or launched by the monitor? How does UART ownership
+     work?
+   - Interaction with sw-cor24-script (sws): any shared runtime
+     concerns or is BASIC fully independent?
+
+   Do NOT proceed to saga creation until the user answers.
+
+8. AFTER user answers: Create the agentrail saga.
+   - Write .agentrail/saga.toml with:
+     - name = "cor24-basic-interpreter"
+     - description of the project
+     - status = "active"
+     - current_step = 1
+     - A plan section summarizing implementation phases
+   - Write saga steps in .agentrail/steps/ based on the finalized
+     plan.md and user feedback
+   - Each step.toml should have [step] with name, status = "pending",
+     and a detailed prompt field explaining exactly what to implement
+     and how to test it
+
+9. Write README.md:
+   - Project name: sw-cor24-basic
+   - One-line: "COR24 BASIC v1 — a 1970s time-sharing BASIC
+     interpreter for the COR24 p-code VM"
+   - Architecture overview (interpreter on p-code VM)
+   - Dialect description (integer-only, line-numbered, teletype)
+   - Current status: "In development"
+   - Relationship to p-code ecosystem repos
+   - License section
+
+10. Commit everything and push to GitHub.
+
+== CONSTRAINTS ==
+
+- BASIC runs ON the p-code VM, not as native COR24 code
+- No BASIC-specific VM opcodes — propose only language-neutral
+  primitives if VM extensions are needed
+- Implementation language TBD (user must confirm before coding)
+- If C path: tc24r subset (no structs, no malloc, parallel arrays)
+- If Pascal path: standard Pascal compiled by sw-cor24-plsw
+- Fixed-size buffers and tables, no dynamic allocation in v1
+- Educational clarity matters more than performance
+
+== SIBLING REPOS FOR REFERENCE ==
+
+- ~/github/sw-embed/sw-cor24-pcode/ — p-code VM (MUST READ)
+- ~/github/sw-embed/sw-cor24-plsw/ — Pascal compiler (MUST READ)
+- ~/github/sw-embed/sw-cor24-pascal/ — Pascal language support
+- ~/github/sw-embed/sw-cor24-emulator/ — emulator for testing
+- ~/github/sw-embed/sw-cor24-assembler/ — same CLAUDE.md/agentrail
+  pattern to follow (native project with saga)
+- ~/github/sw-embed/sw-cor24-monitor/ — monitor/service processor
+- ~/github/sw-embed/sw-cor24-script/ — sws scripting language
+- ~/github/sw-embed/sw-cor24-macrolisp/ — Lisp interpreter (similar
+  interpreter-on-VM pattern)
+- ~/github/sw-embed/sw-cor24-apl/ — APL interpreter
