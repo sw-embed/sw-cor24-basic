@@ -1,0 +1,21 @@
+[step]
+name = "014-print-formatting"
+status = "pending"
+prompt = """
+Polish PRINT formatting and mixed output.
+
+1. Enhance stmt_print() in basic_stmt.pas:
+   - Track current column position for tab stops
+   - Comma: advance to next 14-character column (pad with spaces)
+   - Semicolon: no separator between items
+   - Trailing semicolon: suppress newline
+   - No trailing separator: print newline
+   - Mixed strings and expressions: PRINT "A=";A
+
+2. Test:
+   - PRINT 1,2,3 → tabbed columns at 0, 14, 28
+   - PRINT 1;2;3 → "123"
+   - PRINT "A=";A → "A=5" (assuming A=5)
+   - PRINT "X",  → tab but no newline
+   - PRINT with no args → blank line
+"""

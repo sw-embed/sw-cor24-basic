@@ -1,0 +1,24 @@
+[step]
+name = "015-input-enhancements"
+status = "pending"
+prompt = """
+Enhance INPUT statement and error handling.
+
+1. Enhance stmt_input():
+   - INPUT A: print "? " prompt, read integer
+   - INPUT "prompt";A: print custom prompt, read integer
+   - On non-numeric input: print "?REDO" and re-prompt
+   - Handle negative numbers in input
+
+2. Polish error messages in basic_errors.pas:
+   - Consistent format: "?ERROR IN LINE nnn" during RUN
+   - Consistent format: "?ERROR" in immediate mode
+   - All error codes mapped to message strings
+   - Debug codes stored in interpreter state for debugger access
+
+3. Test:
+   - INPUT A with valid integer → stored correctly
+   - INPUT A with "abc" → re-prompts
+   - INPUT "GUESS";A → custom prompt shown
+   - All error conditions produce appropriate messages
+"""

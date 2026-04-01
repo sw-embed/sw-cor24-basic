@@ -1,0 +1,41 @@
+[step]
+name = "008-repl-skeleton"
+status = "pending"
+prompt = """
+Implement the REPL (Read-Eval-Print Loop) skeleton.
+
+1. Create src/basic_repl.pas with:
+   - Main REPL loop:
+     a. Print "READY" prompt
+     b. Read line from terminal into input_buffer
+     c. Classify: if starts with digit → tokenize and store line
+     d. If no digit → tokenize and execute immediately
+   - Banner on startup: "COR24 BASIC V1" + memory available
+
+2. Create src/basic_errors.pas with:
+   - Error code constants (1-15)
+   - Error message strings
+   - report_error(code, line_num): print error message
+   - Error recovery: on error, print message, return to REPL
+
+3. Create src/basic_main.pas — program entry point:
+   - Initialize interpreter state (basic_runtime)
+   - Call REPL loop
+
+4. Create src/basic_runtime.pas with:
+   - Interpreter state variables (globals):
+     program_start, program_end, program_limit
+     current_line_ptr, next_line_ptr, token_ptr
+     running, stopped, error_code
+     gosub_sp, for_sp
+   - init_runtime(): set up memory areas, clear state
+   - reset_runtime(): clear vars and stacks (for RUN)
+
+5. Build and run on emulator. Verify:
+   - Banner prints
+   - Can type PRINT 42 and see "42"
+   - Can enter "10 PRINT 42" (stored, no immediate output)
+   - Syntax errors show message and return to READY
+
+This is the first end-to-end milestone: interactive BASIC on the VM.
+"""

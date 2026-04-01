@@ -1,0 +1,22 @@
+[step]
+name = "003-token-definitions"
+status = "pending"
+prompt = """
+Implement token definitions and keyword table for the BASIC tokenizer.
+
+1. Create src/basic_tokens.pas with:
+   - Token type constants (0x80-0x9F keywords, 0xA0-0xAF operators,
+     0xB0-0xB7 delimiters, 0xC0-0xD9 variables, 0xE0 integer,
+     0xE1 string, 0x00 end-of-line)
+   - Keyword string table mapping token bytes to keyword names
+   - Keyword count and lookup constants
+
+2. Create src/basic_detok.pas with:
+   - Detokenizer: convert token buffer back to printable BASIC text
+   - Used by LIST command and SAVE (future)
+
+3. Test: write a small test that prints each keyword name from the
+   table to verify the table is correctly defined.
+
+Reference: docs/design.md section 1 (Tokenizer Specification)
+"""

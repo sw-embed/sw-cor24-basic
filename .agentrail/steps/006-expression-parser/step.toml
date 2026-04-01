@@ -1,0 +1,38 @@
+[step]
+name = "006-expression-parser"
+status = "pending"
+prompt = """
+Implement the expression parser (basic_expr) using precedence climbing.
+
+1. Create src/basic_expr.pas with:
+   - parse_expression(): top-level entry point, returns integer result
+   - Precedence levels:
+     Level 1 (lowest): =, <>, <, <=, >, >= (comparisons, return 0/1)
+     Level 2: +, - (addition/subtraction)
+     Level 3: *, / (multiplication/division)
+     Level 4 (highest): unary -, unary + (prefix)
+   - Primary expressions:
+     - Integer literal (decode 3-byte value from token)
+     - Variable (look up in variable table)
+     - Parenthesized expression
+     - PEEK(expr) — read byte from address via loadb
+     - ABS(expr) — absolute value
+   - Token pointer advancement through token buffer
+   - Division by zero → error
+
+2. Create src/basic_vars.pas with:
+   - Variable table: array of 26 integers (A-Z)
+   - get_var(index): read variable value
+   - set_var(index, value): write variable value
+   - clear_vars(): zero all variables
+
+3. Test with immediate-mode evaluation:
+   - 2+3*4 → 14 (precedence)
+   - (2+3)*4 → 20 (parentheses)
+   - -5+3 → -2 (unary minus)
+   - 10/3 → 3 (integer division)
+   - 5=5 → 1, 5=6 → 0 (comparison)
+   - ABS(-42) → 42
+
+Reference: docs/design.md section 2
+"""

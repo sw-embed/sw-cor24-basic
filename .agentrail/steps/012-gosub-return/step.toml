@@ -1,0 +1,30 @@
+[step]
+name = "012-gosub-return"
+status = "pending"
+prompt = """
+Implement GOSUB and RETURN statements.
+
+1. Implement GOSUB stack in basic_runtime.pas:
+   - gosub_stack: array of 64 line pointers
+   - gosub_sp: stack pointer (0 = empty)
+   - gosub_push(line_ptr): push, error on overflow
+   - gosub_pop(): pop, error on underflow
+
+2. Implement stmt_gosub():
+   - Push next_line_ptr onto GOSUB stack
+   - Parse target line number
+   - Execute as GOTO (search and jump)
+   - OUT OF MEMORY on stack overflow
+
+3. Implement stmt_return():
+   - Pop line pointer from GOSUB stack
+   - Set current_line_ptr to popped value
+   - RETURN WITHOUT GOSUB on empty stack
+
+4. Test:
+   - Simple subroutine: 10 GOSUB 100 / 20 END / 100 PRINT "SUB" /
+     110 RETURN → prints "SUB"
+   - Nested GOSUB (2-3 levels)
+   - RETURN WITHOUT GOSUB error
+   - Deep nesting to test stack limits
+"""

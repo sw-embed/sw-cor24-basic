@@ -1,0 +1,38 @@
+[step]
+name = "013-for-next"
+status = "pending"
+prompt = """
+Implement FOR...TO...STEP and NEXT statements.
+
+1. Implement FOR stack in basic_runtime.pas:
+   - Parallel arrays: for_var[16], for_limit[16], for_step[16],
+     for_restart[16]
+   - for_sp: stack pointer (0 = empty)
+   - for_push(var, limit, step, restart): push or overwrite existing
+   - for_find(var): find entry by variable index
+
+2. Implement stmt_for():
+   - Parse: FOR var = start_expr TO limit_expr [STEP step_expr]
+   - Default STEP = 1
+   - Set variable to start value
+   - Push FOR entry with limit, step, and restart pointer (next line)
+   - Skip check: if step>0 and start>limit, or step<0 and start<limit,
+     skip to matching NEXT
+
+3. Implement stmt_next():
+   - Parse: NEXT var
+   - Find matching FOR entry by variable
+   - Add step to variable
+   - Check: if step>0 and var>limit, or step<0 and var<limit:
+     pop entry, continue to next line
+   - Else: set current_line_ptr to restart (loop back)
+   - NEXT WITHOUT FOR if no match
+
+4. Test:
+   - FOR I=1 TO 10 / PRINT I / NEXT I → prints 1-10
+   - FOR I=10 TO 1 STEP -1 / PRINT I / NEXT I → prints 10-1
+   - Nested FOR loops
+   - NEXT WITHOUT FOR error
+   - FOR with step=0 protection (infinite loop guard?)
+   - LED blink demo: GOSUB delay with FOR/NEXT
+"""

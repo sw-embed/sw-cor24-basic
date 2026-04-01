@@ -1,0 +1,2635 @@
+
+
+
+
+
+research.txt
+Document
+I have a p-code VM and a compiler for Pascal to p-code. The VM runs on a COR24 ISA emulator (and hardware, but not tested there yet).  I want to create a BASIC interpreter that runs on the VM.  Can you come up with an implementation plan and design for a 1977's-inspired BASIC with PEEK/POKE
+
+
+Thought
+
+Thought for 16s
+You want a 1977-inspired BASIC interpreter that:
+
+runs on your p-code VM, not directly on COR24,
+
+is small, interactive, and educational,
+
+exposes PEEK/POKE for low-level access,
+
+fits a 24-bit integer-only machine,
+
+can coexist cleanly with your Pascal→p-code toolchain,
+
+and ideally helps validate the VM as a second front end, not just as an end-user language.
+
+That is a very good fit for the layered design you were already converging on: generic VM/runtime first, languages above it. Your earlier notes already point toward keeping the VM language-neutral, with generic allocation, memory movement, traps, debug hooks, and primitive I/O below Pascal-specific behavior; BASIC slots naturally into that same model as another front end/runtime layer rather than as a special case. 
+
+ 
+
+
+Recommendation
+Build this in three layers:
+
+Layer 0 — p-code VM and runtime substrate
+Keep this language-neutral.
+
+It should own:
+
+instruction set
+
+globals / stack / heap layout
+
+trap handling
+
+primitive I/O hooks
+
+debug/source mapping hooks
+
+raw memory access primitives
+
+That matches the separation you were already considering for Pascal and future languages. 
+
+ 
+
+
+Layer 1 — BASIC runtime
+This is a thin library on top of the VM, providing:
+
+console input/output
+
+line editor
+
+token buffer
+
+program storage
+
+variable table
+
+expression evaluator helpers
+
+PEEK/POKE helpers
+
+GOSUB/RETURN stack
+
+FOR/NEXT stack
+
+string buffer utilities
+
+Layer 2 — BASIC interpreter
+This parses and executes tokenized BASIC lines.
+
+For a first version, make it an interpreter of tokenized BASIC source, not a compiler to p-code. That keeps the project historically faithful and reduces risk.
+
+Later, you can add:
+
+optional “compile BASIC to p-code blocks”
+
+optional direct-threaded/token-threaded execution
+
+optional structured BASIC subset that compiles more aggressively
+
+High-level design choice
+There are two plausible designs.
+
+Option A — classic interpreted BASIC
+Store tokenized program lines and interpret them line-by-line.
+
+Pros
+closest to 1977 home-computer BASIC
+
+easy to get a REPL working early
+
+easy to save/list/edit programs
+
+great for monitor-style hardware bring-up
+
+natural fit for PEEK, POKE, PRINT, INPUT
+
+Cons
+slower
+
+control-flow implementation is a little messier than compiled code
+
+expression evaluator must be robust
+
+Option B — BASIC front end compiling to p-code
+Parse BASIC and emit p-code for each line or whole program.
+
+Pros
+faster
+
+reuses more of the VM
+
+aligns with long-term multi-language goals
+
+Cons
+farther from 1977 feel
+
+harder to implement incrementally
+
+more moving parts before first success
+
+My recommendation
+Start with Option A first, then optionally add Option B later.
+
+That gives you:
+
+an early interactive environment,
+
+a second consumer of the VM runtime,
+
+and a good hardware bring-up language.
+
+BASIC dialect recommendation
+Do not start with Microsoft BASIC compatibility as a hard goal.
+
+Instead, define your own dialect:
+
+“SWBASIC-77” goals
+Inspired by late-1970s 8-bit BASICs:
+
+line-numbered
+
+integer-first
+
+interactive
+
+immediate mode + stored program mode
+
+simple strings
+
+GOTO, GOSUB, RETURN
+
+IF ... THEN
+
+FOR ... TO ... STEP ... NEXT
+
+PRINT, INPUT
+
+LIST, RUN, NEW
+
+PEEK, POKE
+
+maybe USR later
+
+But with deliberate simplifications:
+
+integer only at first
+
+24-bit signed integers
+
+no floating point
+
+no arrays at v0 unless really needed
+
+no user-defined functions at first
+
+no DATA/READ/RESTORE initially
+
+no file I/O initially
+
+That keeps it aligned with your integer-only target and your VM-first plan. Your earlier design notes also emphasized a neutral VM with raw memory access and simple trap/debug support, which maps well to a small integer BASIC. 
+
+ 
+
+
+Language surface: v0 and v1
+v0 — minimal interactive BASIC
+Enough to prove the system.
+
+Statements
+LET A = expr
+
+PRINT expr [, expr ...]
+
+INPUT A
+
+IF expr THEN line
+
+GOTO line
+
+END
+
+REM ...
+
+LIST
+
+RUN
+
+NEW
+
+Functions
+PEEK(addr)
+
+ABS(x)
+
+Example
+10 LET A = PEEK(FF0101)
+20 PRINT A
+30 GOTO 10
+v1 — actually useful 1977-style BASIC
+Add:
+
+GOSUB line
+
+RETURN
+
+FOR V = start TO end [STEP s]
+
+NEXT V
+
+POKE addr, value
+
+PRINT "text"
+
+string literals
+
+LOAD / SAVE if you later add storage
+
+STOP
+
+CONT maybe later
+
+Example
+10 PRINT "BLINK"
+20 POKE 65280,1
+30 GOSUB 100
+40 POKE 65280,0
+50 GOSUB 100
+60 GOTO 20
+100 FOR I = 1 TO 1000
+110 NEXT I
+120 RETURN
+Core semantic choices
+Numeric model
+Use exactly one numeric type in v0/v1:
+
+signed 24-bit integer
+
+wraparound arithmetic or trap-on-overflow — choose one and document it
+
+I would recommend:
+
+wraparound at VM level
+
+optional BASIC overflow trap in debug mode
+
+Why
+matches the machine
+
+makes POKE/address arithmetic simple
+
+avoids soft-float complexity
+
+very 1970s-friendly
+
+Variable model
+Start with:
+
+scalar variables only
+
+case-insensitive names
+
+one or two characters plus optional suffix if you want retro flavor
+
+Example:
+
+A
+
+I
+
+X
+
+AB
+
+I would not start with full long identifiers unless you want a less period-authentic feel.
+
+Recommendation
+Support:
+
+A..Z
+
+optionally A0..Z9
+
+later longer names
+
+That makes the runtime table trivial.
+
+String model
+Keep strings simple:
+
+string literals in source
+
+print-only at first
+
+optional string variables later
+
+For v0:
+
+allow "HELLO"
+
+no string variables
+
+For v1:
+
+add string variables with fixed max length or heap-backed buffers
+
+Because your VM plan already leaves room for string/object block types later, strings can be added without corrupting the generic runtime boundary. 
+
+
+Program representation
+Use classic line-numbered storage.
+
+Internal representation
+Each stored line:
+
+line number
+
+byte length
+
+tokenized content
+
+next-line link or contiguous packed layout
+
+Two layout choices
+Option 1 — linked list of lines
+Pros
+simple insertion/deletion
+
+natural for editing
+
+Cons
+more pointer chasing
+
+more heap use
+
+Option 2 — packed sorted buffer
+Pros
+compact
+
+faster listing/run traversal
+
+Cons
+insertion/deletion requires shifting
+
+Recommendation
+For your environment, use:
+
+packed program area for stored lines
+
+sorted by line number
+
+linear search at first
+
+later optional line index table
+
+This feels right for a small interpreter and is easy to inspect in the debugger.
+
+Tokenization
+Tokenize on line entry.
+
+For example:
+
+10 PRINT "HI",A
+could become conceptually:
+
+[LINE=10][TOK_PRINT][STR "HI"][TOK_COMMA][TOK_VAR A][EOL]
+Why tokenize
+smaller stored program
+
+faster execution
+
+easier parser
+
+historically appropriate
+
+Token categories
+keywords: PRINT, IF, THEN, GOTO, FOR, ...
+
+operators: + - * / = <> < <= > >=
+
+delimiters: , ; ( )
+
+identifiers
+
+integer literals
+
+string literals
+
+Execution model
+Immediate mode
+If input line has no leading number:
+
+tokenize
+
+execute immediately
+
+Example:
+
+PRINT 2+2
+POKE 65280,1
+Program mode
+If input line begins with a line number:
+
+tokenize and store
+
+replace existing line with same number
+
+empty body deletes line
+
+Example:
+
+100 PRINT "HELLO"
+Parser design
+Do not build a full AST for stored BASIC initially.
+
+That is overkill for 1977-style BASIC.
+
+Instead:
+
+Recommended parser model
+tokenized line buffer
+
+recursive-descent expression parser
+
+statement dispatcher for each line
+
+evaluation directly from token stream
+
+Expression parser
+Use Pratt or precedence-climbing.
+
+Support:
+
+unary + -
+
+* /
+
++ -
+
+comparisons
+
+parentheses
+
+variables
+
+literals
+
+PEEK(expr)
+
+Statement dispatcher
+Switch on first token:
+
+LET
+
+PRINT
+
+INPUT
+
+IF
+
+GOTO
+
+GOSUB
+
+RETURN
+
+FOR
+
+NEXT
+
+END
+
+REM
+
+implicit assignment if identifier starts line
+
+Runtime state
+A compact interpreter state struct is enough.
+
+Suggested interpreter state
+InterpreterState
+  program_start
+  program_end
+  current_line_ptr
+  next_line_ptr
+
+  vars[26 or N]
+  gosub_stack[]
+  for_stack[]
+
+  input_buffer
+  token_buffer
+  string_pool
+
+  running_flag
+  stopped_flag
+  error_code
+Stacks needed
+GOSUB stack
+Store:
+
+return line pointer
+
+maybe return token offset if you later allow multiple statements per line
+
+FOR stack
+Store:
+
+variable id
+
+limit value
+
+step value
+
+line pointer to loop body restart point
+
+PEEK / POKE design
+This is one of the most important parts.
+
+Semantics
+PEEK(addr)
+Returns a value from memory.
+
+POKE addr, value
+Writes a value to memory.
+
+Width problem
+Because your machine is 24-bit, decide what “one memory unit” means.
+
+You have three plausible meanings:
+
+Option A — byte-based
+PEEK(addr) reads 8 bits
+
+POKE addr,val writes 8 bits
+
+Option B — word-based
+reads/writes 24-bit words
+
+Option C — both, with extensions
+PEEK/POKE are byte-based
+
+DEEK/DOKE or PEEKW/POKEW for words
+
+Recommendation
+Use byte-based PEEK/POKE, then add word access separately.
+
+Why
+historically familiar
+
+best for UART/MMIO
+
+best for character and raw hardware work
+
+avoids ambiguity on non-word-aligned addresses
+
+Then add one of:
+
+PEEKW(addr)
+
+POKEW addr,val
+
+or
+
+PEEK24(addr)
+
+POKE24 addr,val
+
+for your native word size.
+
+Safety policy
+This matters a lot.
+
+In debug mode
+bounds-check RAM access
+
+trap writes to forbidden regions unless explicitly enabled
+
+optionally distinguish code/data/MMIO
+
+In raw mode
+allow full access
+
+Best compromise
+Add a mode flag:
+
+SAFE
+
+UNSAFE
+
+or a runtime command:
+
+SYSTEM
+MONITOR
+But for v1, just document that PEEK/POKE can hit MMIO and code/data and are intentionally dangerous.
+
+Hardware and system calls
+You have two design choices for BASIC hardware access.
+
+Option A — pure PEEK/POKE against memory map
+Examples:
+
+10 POKE 65280,1
+20 A = PEEK(65281)
+Pros
+simple
+
+authentic
+
+transparent
+
+Cons
+exposes raw addresses everywhere
+
+harder to port if memory map changes
+
+Option B — add small built-ins
+Examples:
+
+LED 1
+A = INP(port)
+OUT port,val
+Pros
+nicer user experience
+
+less magic-number dependence
+
+Cons
+less minimal
+
+duplicates PEEK/POKE power
+
+Recommendation
+Start with PEEK/POKE only, then optionally add sugar later:
+
+IN(addr)
+
+OUT addr,val
+
+CALL addr or USR(n) later
+
+Error handling
+Classic BASIC often printed terse errors. That is fine.
+
+Suggested v1 errors
+SYNTAX ERROR
+
+WHAT?
+
+BAD LINE NUMBER
+
+OUT OF MEMORY
+
+DIVISION BY ZERO
+
+RETURN WITHOUT GOSUB
+
+NEXT WITHOUT FOR
+
+OUT OF DATA later if needed
+
+BAD ADDRESS
+
+STOPPED
+
+Debug mode
+Because you also want a debugger ecosystem, add richer internal error codes underneath the user-facing messages. Your earlier VM notes already emphasized explicit traps, frame visibility, and debugger-friendly metadata; keep that same philosophy here. 
+
+
+Interaction with your p-code VM
+This is the architecture I recommend.
+
+BASIC implementation language
+Write the BASIC interpreter in one of two ways:
+
+Path 1 — interpreter written in Pascal, compiled to p-code
+This is elegant long-term.
+
+Path 2 — interpreter written in p-code assembly first
+This is probably the better bring-up path.
+
+Given your earlier idea of adding a p-code assembler for VM/runtime testing, I would lean toward this split:
+
+low-level runtime helpers in p-code assembly
+
+BASIC interpreter core maybe in Pascal later
+
+or write the initial BASIC in Pascal once Pascal is stable enough
+
+That fits your already-established layering: generic VM first, then language-specific layers on top. 
+
+ 
+
+
+Practical recommendation
+Do this in phases:
+
+Phase A
+Implement BASIC interpreter on the host first in C or Rust to validate semantics.
+
+Phase B
+Port/rewrite it to run on your VM.
+
+Phase C
+Optionally rewrite core parts in Pascal compiled to p-code.
+
+That mirrors the historical “prototype in one language, later re-express/self-host” pattern you were already considering for Pascal itself. 
+
+
+Suggested command set
+Immediate commands
+LIST
+
+RUN
+
+NEW
+
+CONT later
+
+MEM
+
+VARS
+
+BYE
+
+Statements
+REM
+
+LET
+
+PRINT
+
+INPUT
+
+IF ... THEN
+
+GOTO
+
+GOSUB
+
+RETURN
+
+FOR ... TO ... STEP
+
+NEXT
+
+STOP
+
+END
+
+Functions
+PEEK
+
+ABS
+
+RND later
+
+USR later
+
+PEEKW later
+
+What I would postpone
+Do not start with:
+
+floating point
+
+multidimensional arrays
+
+DATA/READ/RESTORE
+
+ON ... GOTO
+
+string slicing
+
+garbage collection
+
+file I/O
+
+tokenized binary save format
+
+Microsoft BASIC compatibility edge cases
+
+multiple statements per line with :
+
+You can add : later, but it complicates return targets and line execution state.
+
+Memory management
+For BASIC specifically:
+
+v0/v1
+Use:
+
+static program area
+
+static variable table
+
+fixed stacks for FOR and GOSUB
+
+fixed string literal storage in tokenized lines
+
+optional small heap only if you add dynamic strings
+
+That works well with the generic runtime model you outlined earlier, where the VM owns raw allocation and memory primitives, while each language chooses its own policy. You even already called out BASIC as a good candidate for dynamic strings plus simple reference counting later, which is exactly the right “not now, maybe later” posture. 
+
+
+Recommendation
+For first BASIC:
+
+no GC
+
+ideally no heap at all, unless strings force it
+
+fixed-size buffers are fine
+
+Debugger implications
+Because this language will be used partly for bring-up, give it a debugger-friendly design.
+
+Useful debugger views:
+
+current BASIC source line
+
+tokenized line bytes
+
+current statement token pointer
+
+variable table
+
+FOR stack
+
+GOSUB stack
+
+interpreter state flags
+
+recent PEEK/POKE activity
+
+That matches your broader debugger direction: expose frames, memory, and interpreter-visible structures rather than only low-level machine state. 
+
+
+Implementation plan
+Milestone 1 — language and runtime spec
+Write:
+
+basic77-language.md
+
+basic77-tokens.md
+
+basic77-memory.md
+
+basic77-errors.md
+
+Define exact syntax and behavior before coding too much.
+
+Milestone 2 — tokenizer
+Implement:
+
+line number detection
+
+keyword recognition
+
+integer literals
+
+string literals
+
+identifier recognition
+
+token dump tests
+
+Tests:
+
+tokenize PRINT 1+2
+
+tokenize 10 GOTO 200
+
+tokenize POKE 65280,1
+
+Milestone 3 — immediate-mode evaluator
+Support immediate execution only:
+
+PRINT
+
+assignment
+
+expressions
+
+PEEK
+
+POKE
+
+Tests:
+
+PRINT 2+3*4
+
+POKE addr,val
+
+PRINT PEEK(addr)
+
+Milestone 4 — stored program representation
+Implement:
+
+insert line
+
+replace line
+
+delete line
+
+LIST
+
+NEW
+
+Tests:
+
+add out-of-order lines
+
+verify sorted listing
+
+replace existing line
+
+Milestone 5 — program runner
+Add:
+
+RUN
+
+GOTO
+
+IF THEN
+
+END
+
+Tests:
+
+counter loop
+
+branch test
+
+line number lookup
+
+Milestone 6 — subroutines and loops
+Add:
+
+GOSUB
+
+RETURN
+
+FOR
+
+NEXT
+
+Tests:
+
+nested GOSUB
+
+nested FOR
+
+error cases
+
+Milestone 7 — strings and console polish
+Add:
+
+quoted string printing
+
+commas/semicolons in PRINT
+
+better prompts and error messages
+
+Milestone 8 — hardware demos
+Write demo programs for:
+
+hello world
+
+UART echo
+
+LED blink
+
+memory dump using PEEK
+
+Suggested test programs
+Hello world
+10 PRINT "HELLO, WORLD"
+20 END
+Count loop
+10 FOR I=1 TO 10
+20 PRINT I
+30 NEXT I
+40 END
+LED blink
+10 POKE 65280,1
+20 GOSUB 100
+30 POKE 65280,0
+40 GOSUB 100
+50 GOTO 10
+100 FOR D=1 TO 500
+110 NEXT D
+120 RETURN
+UART poll
+10 S=PEEK(65281)
+20 IF S=0 THEN 10
+30 C=PEEK(65280)
+40 PRINT C
+50 GOTO 10
+Concrete internal modules
+A clean split might look like this:
+
+basic_lex
+
+basic_tokens
+
+basic_store
+
+basic_expr
+
+basic_stmt
+
+basic_exec
+
+basic_runtime
+
+basic_errors
+
+basic_repl
+
+If you later write it in Pascal, the same conceptual split still works.
+
+Biggest risks
+Risk 1 — trying to be too compatible
+Do not chase every old BASIC quirk.
+
+Risk 2 — adding arrays and strings too early
+They multiply complexity fast.
+
+Risk 3 — unclear PEEK/POKE width
+Decide early: byte first, word later.
+
+Risk 4 — making it depend too much on Pascal
+This should be a sibling front end, not a Pascal sub-feature.
+
+Final recommendation
+Build a small line-numbered integer BASIC interpreter as a separate front end/runtime layer on top of your generic p-code VM, with:
+
+tokenized stored lines,
+
+immediate mode plus RUN,
+
+integer expressions,
+
+PRINT, INPUT, IF, GOTO, GOSUB, RETURN, FOR/NEXT,
+
+byte-oriented PEEK/POKE,
+
+fixed-size tables and stacks,
+
+and no floating point, arrays, or GC in the first version.
+
+That gives you a usable 1977-style environment, a strong VM validation tool, and a clean stepping stone toward additional languages later. It also lines up with the layered VM/runtime direction you already laid out in your earlier notes. 
+
+ 
+
+
+I can turn this next into a concrete basic77-language.md plus a tokenizer grammar and an execution-state struct tailored to COR24/p-code.
+
+
+Clarification: I was thinking of a BASIC that ran on the Univac "mainframe" of the 1970s, (fuzzy memory: 1102, 1103?). I used it in college via teletype terminals which had paper tape reader/punches for loading/saving programs/data.  Would like that capability.  Not interested in later BASICS (like IBM PC DOS compatible nor Visual Basic).   I already have the p-code VM and Pascal Compiler running, so they define the p-code.  If BASIC requires new p-code op codes I can add them.
+
+
+Thought for 11s
+That clarification helps a lot.
+
+You are probably not remembering the much older UNIVAC 1103. The 1103 was a 1950s machine. By contrast, UNIVAC 1100-series BASIC manuals exist from 1972 and 1974, which lines up much better with your “college in the 1970s, teletype terminals, paper tape” memory. So the more likely family is 1108 / 1106 / 1110 / early 1100-series, not the 1103. 
+
+That changes the design target in a useful way.
+
+What kind of BASIC to emulate
+Given your goal, I would not model this after microcomputer BASICs. I would model it as a:
+
+time-sharing / terminal BASIC
+with these characteristics:
+
+line-oriented interactive use from a teletype-style terminal
+
+line-numbered stored programs
+
+immediate commands and program mode
+
+textual save/load
+
+optional paper-tape style I/O
+
+integer-first execution model for your machine
+
+simple but respectable multi-line program editing workflow
+
+That is a better match for a 1970s institutional BASIC environment than IBM PC BASIC or Visual Basic.
+
+Key architectural implication
+Since your p-code VM and Pascal compiler already define the p-code, BASIC should be treated as:
+
+a language/runtime layer above the VM
+not as something that tries to redefine the VM.
+
+So I would keep this split:
+
+Layer 0 — your existing p-code VM
+Owns:
+
+stack/call model
+
+memory model
+
+trap/error mechanism
+
+device access primitives
+
+optional file/tape abstraction hooks
+
+Layer 1 — BASIC runtime
+Owns:
+
+terminal input/output
+
+line editing
+
+stored-program representation
+
+expression evaluation helpers
+
+GOSUB / RETURN
+
+FOR / NEXT
+
+program load/save in text form
+
+tape reader/punch emulation
+
+Layer 2 — BASIC interpreter
+Owns:
+
+tokenizing
+
+parsing
+
+statement dispatch
+
+execution of tokenized lines
+
+That stays consistent with your earlier VM/language layering approach. 
+
+ 
+
+
+Recommended target style
+I would aim for a dialect that feels like:
+
+“UNIVAC-style terminal BASIC, recreated for your VM”
+Not a byte-for-byte compatibility clone unless you later find a manual and want to move in that direction.
+
+In practice, that means:
+
+line numbers required for stored program lines
+
+commands typed without line numbers execute immediately
+
+LIST, RUN, NEW, SAVE, LOAD
+
+optional OLD / SCRATCH style aliases if you want period flavor
+
+text files or tape-like streams for persistence
+
+simple numeric expressions
+
+teletype-friendly output formatting
+
+Paper tape support
+This is the part your clarification most strongly suggests adding.
+
+A paper-tape workflow usually implies:
+
+textual representation, not binary images
+
+sequential input/output
+
+natural support for loading a program from a reader
+
+natural support for punching a program listing or data stream
+
+So I would design two abstractions.
+
+1. Console device
+Interactive teletype:
+
+read char
+
+write char
+
+optional echo
+
+CR/LF normalization
+
+maybe uppercase normalization if you want strong retro feel
+
+2. Tape device
+Sequential stream:
+
+open reader
+
+read char/line until EOF
+
+open punch
+
+write char/line
+
+close
+
+In the emulator, these can simply map to files or pipes.
+
+That gives you an authentic experience without requiring literal paper tape hardware.
+
+Save/load format
+For authenticity and simplicity, I strongly recommend:
+
+plain text BASIC source
+Example:
+
+10 PRINT "HELLO"
+20 GOTO 10
+Why
+perfect for “paper tape”
+
+easy to inspect
+
+easy to punch
+
+easy to debug
+
+easy to bootstrap
+
+compatible with line-numbered editing model
+
+You can later add a tokenized internal save format if you want speed, but text should be first.
+
+Dialect design
+I would narrow the scope to a “mainframe-terminal BASIC” feel rather than a feature race.
+
+v1 statements
+REM
+
+LET
+
+PRINT
+
+INPUT
+
+IF ... THEN
+
+GOTO
+
+GOSUB
+
+RETURN
+
+FOR ... TO ... STEP
+
+NEXT
+
+STOP
+
+END
+
+v1 immediate commands
+LIST
+
+RUN
+
+NEW
+
+SAVE
+
+LOAD
+
+BYE
+
+v1 functions
+PEEK
+
+POKE
+
+ABS
+
+perhaps RND later
+
+PEEK/POKE in this style of BASIC
+These still make sense, even if they were more associated with smaller systems in people’s memories.
+
+But because your environment is really a VM running over COR24, PEEK/POKE should be defined against the VM-visible address space, not against some vague “machine memory.”
+
+Recommendation
+Make them explicit:
+
+PEEK(addr) → byte
+
+POKE addr,val → byte write
+
+and later, if needed:
+
+PEEKW(addr) / POKEW addr,val
+
+or PEEK24(addr) / POKE24 addr,val
+
+That will be much cleaner on a 24-bit machine.
+
+Should you add new p-code opcodes?
+Since your VM already exists, I would avoid adding BASIC-only opcodes unless they clearly improve multiple languages.
+
+Good reasons to add an opcode
+Add one if it is:
+
+useful to Pascal too
+
+useful to future languages too
+
+hard to emulate efficiently in runtime code
+
+conceptually belongs to the VM
+
+Bad reasons
+Do not add an opcode just because BASIC wants one convenience feature.
+
+My recommendation on opcodes
+Probably do not add opcodes yet for:
+PRINT
+
+INPUT
+
+GOTO
+
+FOR
+
+string parsing
+
+line-number lookup
+
+Those are BASIC runtime/interpreter responsibilities.
+
+Consider adding opcodes only for generic facilities such as:
+byte load/store if not already present
+
+trap-with-code
+
+device/system call gateway
+
+block copy/fill
+
+maybe file/tape stream read/write primitives if your VM currently lacks a clean host-I/O abstraction
+
+That keeps the VM general and the language runtime specific.
+
+Program storage design
+For this style of BASIC, I would use:
+
+Stored program as sorted text/tokenized lines
+Each line has:
+
+line number
+
+tokenized body
+
+length
+
+When a user types:
+
+100 PRINT "HELLO"
+you tokenize and insert/replace the line.
+
+When they type:
+
+LIST
+you reconstruct text from stored lines.
+
+When they type:
+
+SAVE "FOO"
+you write the text form sequentially to your tape/file abstraction.
+
+That gives you the paper-tape feel naturally.
+
+Editing model
+For period flavor, keep editing minimal:
+
+entering a numbered line inserts/replaces it
+
+entering a bare line number deletes it
+
+LIST
+
+maybe LIST 100-200
+
+maybe LIST 100,200 depending on syntax you prefer
+
+No screen editor required.
+
+That is very teletype-appropriate.
+
+Execution model
+This kind of BASIC should be:
+
+immediate + stored
+If no line number:
+
+execute immediately
+
+If line number present:
+
+store program line
+
+During RUN:
+
+start from lowest line number
+
+interpreter advances by line pointer
+
+GOTO and GOSUB look up destination line
+
+FOR/NEXT uses a control stack
+
+Variable model
+For authenticity, keep variables simple.
+
+Recommendation
+Start with:
+
+scalar integer variables only
+
+case-insensitive
+
+short names
+
+maybe one or two letters plus optional digit
+
+Examples:
+
+A
+
+I
+
+X1
+
+This is plenty for a first pass and feels right.
+
+Strings
+A teletype BASIC really benefits from strings for PRINT and INPUT, but you do not need full string variables immediately.
+
+v1
+string literals
+
+PRINT "HELLO"
+
+maybe INPUT numeric only
+
+v2
+string variables
+
+fixed-length or heap-backed
+
+I would postpone general string variables unless you specifically need them early.
+
+Tape model details
+Here is the simplest and most authentic way to implement it.
+
+Reader
+Sequential input stream:
+
+LOAD reads text lines until EOF
+
+optional INPUT# later if you want data streams
+
+Punch
+Sequential output stream:
+
+SAVE writes text lines
+
+optional LIST TO PUNCH
+
+Emulator mapping
+reader = host file
+
+punch = host file
+
+terminal = stdin/stdout or virtual teletype device
+
+You could even add monitor commands like:
+
+attach reader
+
+attach punch
+
+which would feel very period-correct.
+
+Suggested commands for this style
+Immediate environment commands
+LIST
+
+RUN
+
+NEW
+
+SAVE
+
+LOAD
+
+BYE
+
+Optional period-flavor additions
+CATALOG
+
+OLD
+
+SCRATCH
+
+CONT
+
+But I would keep the first release smaller.
+
+Error style
+I would favor short, terminal-era messages:
+
+SYNTAX ERROR
+
+WHAT?
+
+BAD LINE NUMBER
+
+OUT OF MEMORY
+
+RETURN WITHOUT GOSUB
+
+NEXT WITHOUT FOR
+
+END OF TAPE
+
+DEVICE ERROR
+
+And beneath that, keep richer internal debug codes for your emulator/debugger.
+
+Concrete implementation plan
+Phase 1 — historical flavor spec
+Write a short spec that defines:
+
+command syntax
+
+statement syntax
+
+numeric model
+
+variable naming rules
+
+line storage rules
+
+save/load text format
+
+tape abstraction
+
+Phase 2 — terminal/tape abstraction
+Implement a VM/runtime I/O layer with:
+
+terminal char input/output
+
+sequential reader input
+
+sequential punch output
+
+Do this before the BASIC parser, because it will shape LOAD/SAVE.
+
+Phase 3 — tokenizer and program store
+Implement:
+
+line number parsing
+
+tokenization
+
+line insertion/replacement/deletion
+
+listing
+
+text reconstruction
+
+Phase 4 — immediate evaluator
+Implement:
+
+integer expressions
+
+assignment
+
+PRINT
+
+PEEK
+
+POKE
+
+Phase 5 — stored-program execution
+Implement:
+
+RUN
+
+GOTO
+
+IF ... THEN
+
+END
+
+Phase 6 — control-flow stacks
+Implement:
+
+GOSUB / RETURN
+
+FOR / NEXT
+
+Phase 7 — load/save via tape
+Implement:
+
+SAVE "name"
+
+LOAD "name"
+or, if you prefer more teletype authenticity,
+
+SAVE
+
+LOAD
+using currently attached reader/punch devices
+
+Example usage model
+Interactive
+READY
+10 PRINT "HELLO"
+20 GOTO 10
+RUN
+Save to punch
+SAVE "HELLO.BAS"
+Load from reader
+LOAD "HELLO.BAS"
+RUN
+Or, in stronger tape flavor:
+
+ATTACH READER HELLO.BAS
+LOAD
+RUN
+What I would not do
+I would avoid:
+
+DOS/PC-style file semantics as the primary user model
+
+tokenized binary file format first
+
+floating point early
+
+complex structured variables
+
+arrays in v1 unless you need them for real workloads
+
+BASIC-specific VM opcodes unless they are truly generic
+
+My best guess about the historical target
+Based on what is easy to verify, your memory is much more likely to point to UNIVAC 1100-series BASIC in the early/mid-1970s than to the far older 1103 family. There are archival references to UNIVAC 1100-series BASIC manuals from 1972 and 1974, which fits your timeframe and institutional use much better. 
+
+So I would design this as:
+
+a 1970s UNIVAC-style terminal BASIC for your p-code VM, with teletype and paper-tape workflow
+rather than as a microcomputer BASIC.
+
+That gives you the right feel without forcing fake compatibility with later BASIC families.
+
+I can next sketch a concrete command set, grammar, and tape/save-load model for this dialect, including whether SAVE/LOAD should be filename-based or attached-device-based.
+
+
+I was offering p-code feature adding only for interpreter-assiting operations, if not already present.  The current VM "runs" compiled Pascal, not interpreting.   To the extent that I want to add other interpreters in the future, if there is a benefit to extending the p-code operations, I would prefer to do that in the VM in a general wav vs. implementing interpeter-specific code in the BASIC interpreter code using existing op-codes, if that makes sense.  Do the right thing now, vs refactor later.
+
+Yes — that makes sense, and I think your instinct is right.
+
+You are really saying:
+
+the VM is already a language-neutral execution substrate,
+
+Pascal currently compiles to p-code and the VM executes that,
+
+BASIC will likely be an interpreter implemented on top of the VM,
+
+and if interpreters need repeated low-level services, those services should live in the VM as general primitives, not as ad hoc BASIC-only hacks.
+
+That is the right direction.
+
+Recommendation
+Treat the VM as a portable abstract machine for both compiled and interpreted languages.
+
+That means:
+
+do not add BASIC-specific opcodes,
+
+do add general interpreter-assisting primitives when they are broadly useful,
+
+and keep language policy in the language runtime/interpreter layer.
+
+So the rule should be:
+
+Add a VM feature only if it is:
+useful to more than one language,
+
+fundamental enough that it belongs in the abstract machine,
+
+significantly simpler/faster/safer in the VM than in p-code library code,
+
+and stable enough that you are unlikely to regret the abstraction.
+
+That gives you “do the right thing now” without polluting the VM.
+
+The architectural split
+I would formalize the split like this.
+
+Layer 0 — host/target substrate
+COR24 emulator, hardware, MMIO, terminal, tape/file abstractions.
+
+Layer 1 — p-code VM
+Language-neutral abstract machine.
+
+Owns:
+
+control flow
+
+call/return
+
+stack/frame model
+
+globals
+
+heap/raw memory
+
+byte/word access
+
+traps/exceptions
+
+system call / device gateway
+
+optional generic string/block helpers
+
+optional generic interpreter helpers
+
+Layer 2 — language runtimes
+Pascal runtime, BASIC runtime, future Lisp runtime, etc.
+
+Owns:
+
+language-visible builtins
+
+data representations beyond VM primitives
+
+line storage
+
+symbol tables
+
+interpreter state
+
+parser/tokenizer
+
+Layer 3 — language implementations
+Pascal compiler, BASIC interpreter, future interpreters/compilers.
+
+That keeps the VM clean while still letting it grow in the right direction.
+
+The key design question
+The real question is not:
+
+“Should BASIC get special support?”
+
+It is:
+
+“What VM primitives make interpreted languages first-class citizens on this abstract machine?”
+
+That is a much better question.
+
+What kinds of VM support are worth adding?
+There are a few categories.
+
+1. Memory and data movement primitives
+These are almost always worth having if not already present.
+
+Examples:
+
+byte load/store
+
+word load/store
+
+indirect load/store
+
+block copy
+
+block fill/zero
+
+compare blocks
+
+bounds-checked memory access or trap-capable memory access
+
+Why they matter
+Interpreters do a lot of:
+
+token scanning
+
+buffer movement
+
+line insertion/deletion
+
+string copying
+
+table walking
+
+You can write all of that in p-code, but a few good primitives make every interpreter and runtime better.
+
+Strong recommendation
+If missing, add:
+
+LOADB, STOREB
+
+MEMCPY
+
+MEMSET
+
+maybe MEMCMP
+
+These are not BASIC-specific at all.
+
+2. Trap and error primitives
+Interpreters need structured failure.
+
+Examples:
+
+TRAP code
+
+TRAP_IF_ZERO
+
+TRAP_IF_NEG
+
+ASSERT-style conditional trap
+
+optional error/status register or last-trap code
+
+Why they matter
+Useful for:
+
+syntax/runtime error handling
+
+bounds checks
+
+illegal token detection
+
+safe PEEK/POKE
+
+debugger integration
+
+Strong recommendation
+If you do not already have a clean trap model, add one now.
+
+This benefits Pascal too.
+
+3. Generic system/device call gateway
+Interpreters often need device access, terminal I/O, tape/file I/O, time, etc.
+
+Examples:
+
+SYSCALL id
+
+HOSTCALL id
+
+IOCALL id
+
+with arguments passed on stack or in a small ABI-defined block.
+
+Why they matter
+This is much better than adding opcodes like:
+
+PRINT_CHAR
+
+READ_LINE
+
+TAPE_READ
+
+because those are too policy-specific.
+
+Strong recommendation
+Have one generic VM gateway for host/OS/device services.
+
+Then BASIC, Pascal runtime, and future interpreters all use it.
+
+4. Generic string/block scanning primitives
+This is where you need judgment.
+
+Interpreters often spend time doing:
+
+skip spaces
+
+scan digits
+
+scan identifiers
+
+compare keywords
+
+find line end
+
+parse delimiters
+
+You could add VM support here, but this is where VM bloat starts if you are not careful.
+
+My recommendation
+Do not add “parse keyword” or “scan identifier” opcodes.
+
+Those are too language-shaped.
+
+But a few low-level helpers may be justified if heavily reused:
+
+find byte in block
+
+compare block to block
+
+length until terminator
+
+uppercase/lowercase conversion helper if your environment strongly wants it
+
+Borderline examples
+Possibly useful:
+
+FIND_BYTE
+
+STRLENZ
+
+CMPSZ
+
+But only if they are generic block/string ops, not “BASIC token” ops.
+
+5. Frame/continuation/interpreter dispatch helpers
+This is the most interesting area.
+
+An interpreter often does repeated dispatch like:
+
+fetch token
+
+jump to handler
+
+return to dispatch loop
+
+If your VM is stack/call oriented, normal call/return may be enough.
+
+But there are a few generic features that can help a lot.
+
+Possible features
+computed jump / indirect branch
+
+jump table support
+
+cheap dispatch primitive
+
+coroutine/continuation-friendly call mechanism later
+
+Recommendation
+If the VM does not already have a decent indirect branch/jump-table capability, consider it.
+
+Why:
+
+useful for interpreters,
+
+useful for virtual dispatch,
+
+useful for future bytecode machines hosted on your p-code VM,
+
+not BASIC-specific.
+
+A generic opcode like:
+
+JMP_IND
+or
+
+CALL_IND
+
+can be very valuable.
+
+6. Stream/iterator primitives
+Since you want teletype/paper tape style systems, interpreters will often read from sequential streams.
+
+This suggests one of two approaches.
+
+Option A — implement streams entirely in runtime code
+The runtime uses generic system calls to read/write bytes.
+
+Option B — add VM-level generic stream primitives
+Examples:
+
+open stream
+
+read byte
+
+write byte
+
+status
+
+close
+
+Recommendation
+I would only add these at the VM level if you believe multiple languages will want stream semantics, which is likely.
+
+But even then, I would still probably expose them via generic system calls, not dedicated opcodes.
+
+So:
+
+VM has a generic callout mechanism,
+
+runtime libraries define “reader”, “punch”, “console” abstractions on top.
+
+That keeps the VM simpler.
+
+What should not go into the VM
+These should stay out.
+
+Do not add:
+BASIC_NEXT_LINE
+
+BASIC_LOOKUP_LINE
+
+BASIC_PARSE_NUMBER
+
+BASIC_PRINT
+
+BASIC_INPUT
+
+BASIC_FOR_SETUP
+
+BASIC_GOSUB
+
+keyword tokenization opcodes
+
+line-number search opcodes
+
+These are interpreter/runtime policy, not abstract-machine primitives.
+
+Even if they are tempting now, they will make later interpreters awkward.
+
+A good rule of thumb
+Ask of each proposed opcode:
+
+“Could Pascal runtime, BASIC, Lisp, and a future command shell all plausibly use this?”
+If yes, it is a good VM candidate.
+
+If no, it probably belongs in runtime/interpreter code.
+
+My recommended VM extensions
+Given your stated goals, this is the set I would evaluate first.
+
+Definitely worth having if missing
+Memory primitives
+LOADB
+
+STOREB
+
+LOADW / native word load if not already clear
+
+STOREW
+
+MEMCPY
+
+MEMSET
+
+Control / dispatch
+JMP_IND
+
+maybe CALL_IND
+
+Trap / safety
+TRAP code
+
+conditional trap support
+
+clear machine-visible trap status
+
+Generic host/device interface
+one SYSCALL / HOSTCALL mechanism
+
+These are broadly useful and future-proof.
+
+Possible second-tier extensions
+Only if usage proves it.
+
+Block/string helpers
+MEMCMP
+
+FIND_BYTE
+
+STRLENZ
+
+Arithmetic helpers
+If interpreters need them often:
+
+divide with quotient/remainder pair
+
+compare helpers
+
+bitfield operations
+
+Allocation helpers
+generic block alloc/free if the VM does not already provide a solid heap API
+
+What this means for BASIC
+For BASIC itself, I would implement the interpreter mostly in ordinary p-code, using:
+
+byte/word memory ops
+
+generic call/return
+
+generic host/device calls
+
+generic traps
+
+maybe indirect dispatch
+
+Then BASIC’s own code handles:
+
+line storage
+
+tokenization
+
+expression parsing
+
+line-number lookup
+
+FOR/NEXT
+
+GOSUB/RETURN
+
+PEEK/POKE
+
+That is the right level.
+
+Benefits of this approach
+Pros
+1. Cleaner VM
+The VM becomes better at hosting many languages, not just BASIC.
+
+2. Better long-term reuse
+Future interpreters benefit:
+
+BASIC
+
+Lisp
+
+shell/scripting language
+
+monitor command language
+
+macro processor
+
+debugger expression evaluator
+
+3. Less refactoring later
+You avoid baking parser logic into the VM and then regretting it.
+
+4. Better debugger story
+Generic traps, memory ops, and indirect dispatch are easy to expose in the debugger.
+
+5. Better performance where it matters
+You accelerate the low-level hot spots without hardcoding a single language.
+
+Cons
+1. Slightly more VM design work now
+You need to think carefully about ABI and semantics.
+
+2. Risk of premature abstraction
+If you add too many “generic” helpers, you may still end up with clutter.
+
+3. Some interpreter code will still be verbose
+That is fine. Not everything belongs in the VM.
+
+Practical selection methodology
+Before changing the VM, I would do this.
+
+Step 1 — implement a rough BASIC interpreter design using current ops
+Do not optimize yet. Just sketch the runtime.
+
+Step 2 — identify repeated pain points
+Count where the interpreter would repeatedly need:
+
+byte scanning
+
+table dispatch
+
+memory movement
+
+host I/O
+
+trap handling
+
+Step 3 — extract only the repeated language-neutral pain
+Those become VM extension candidates.
+
+Step 4 — test those same candidates against other future languages
+Ask:
+
+would Lisp want this?
+
+would a monitor shell want this?
+
+would a debugger expression evaluator want this?
+
+would Pascal runtime want this?
+
+If yes, promote to VM.
+
+This gives you discipline without deferring forever.
+
+My concrete recommendation to “do the right thing now”
+If I were making the call today, I would not extend the VM with anything BASIC-shaped.
+
+I would make sure the VM has this minimum interpreter-friendly base:
+
+Core interpreter-friendly VM feature set
+byte-addressable memory access
+
+block copy/fill
+
+generic trap/error primitive
+
+generic host/device call primitive
+
+indirect jump/call support
+
+clean heap/block allocation API if dynamic buffers are needed
+
+That is the sweet spot.
+
+Everything above that should stay in interpreter/runtime code until multiple language implementations prove a more specific abstraction is truly general.
+
+One sentence summary
+You are right to want VM support for interpreter-assisting operations, but the right boundary is: add only language-neutral primitives to the VM, and keep language semantics, parsing, and control structures in the interpreter/runtime layer.
+
+If you want, I can take the next step and produce a candidate VM extension list in three columns: must-have now / maybe later / keep out of VM.
+
+
+so what flavor of BASIC are we planning for now?  Earlier you mentioned BASIC77, is that a standard?  Does it require floats/reals?  should I call this sw-cor24-basic or -tiny-basic or -basic77 or something else?
+
+You’re really deciding three things at once:
+
+Semantic target (what “kind” of BASIC this behaves like)
+
+Feature envelope (what you include now vs later)
+
+Naming/packaging (how future-proof and honest the repo name is)
+
+Let’s walk through that cleanly.
+
+1) What “flavor” of BASIC are we actually building?
+Short answer
+You are not targeting a formal standard.
+
+You are building:
+
+A 1970s time-sharing / teletype BASIC-inspired dialect, implemented on your p-code VM
+
+About “BASIC77”
+“BASIC77” is not a real standard.
+
+It’s just a convenient label I used to describe:
+
+late-70s style
+
+line-numbered
+
+interactive
+
+terminal-oriented BASIC
+
+Actual formal standards came later:
+
+ANSI Minimal BASIC (X3.60-1978)
+
+ANSI Full BASIC (X3.113-1987)
+
+So:
+
+👉 Do not call your implementation “BASIC77” as if it were a standard.
+
+What you are closest to
+You are closest to a blend of:
+
+1. Time-sharing BASIC (mainframe / minicomputer)
+line-numbered programs
+
+terminal interaction
+
+SAVE/LOAD as text
+
+often simpler numerics in practice
+
+2. Early interactive BASIC environments
+immediate + program mode
+
+LIST, RUN, NEW
+
+minimal editing model
+
+3. Minimal BASIC (conceptually)
+…but without the requirement for floats (more on that next)
+
+2) Do you need floats/reals?
+Historical truth
+Many “official” BASICs expected:
+
+floating point
+
+exponent notation
+
+functions like SIN, LOG, etc.
+
+👉 ANSI Minimal BASIC requires floating point.
+
+Your reality
+You are on:
+
+a 24-bit integer ISA
+
+a custom VM
+
+with Pascal already working
+
+You want:
+
+hardware-oriented BASIC
+
+PEEK/POKE
+
+teletype feel
+
+interpreter simplicity
+
+Recommendation
+Do NOT require floating point in v1
+Start with:
+
+v1 numeric model
+signed 24-bit integer
+
+wraparound or trap (your choice)
+
+no floats
+
+no exponent notation
+
+Why this is the right call
+Pros
+dramatically simpler interpreter
+
+no soft-float runtime needed
+
+aligns with COR24 hardware
+
+better for systems / hardware work
+
+easier debugging
+
+Cons
+not ANSI-compatible BASIC
+
+fewer math capabilities
+
+Future path (important)
+Design now so you can later add:
+
+v2 option
+software float library (32-bit or 48-bit)
+
+optional REAL mode or FLOAT BASIC
+
+functions: SIN, EXP, etc.
+
+But do not block v1 on this.
+
+3) What should we call it?
+This is actually important for long-term clarity.
+
+Let’s evaluate your options.
+
+Option A — basic77
+❌ Not recommended
+
+Problems:
+implies a standard that doesn’t exist
+
+suggests compatibility expectations
+
+misleading historically
+
+Option B — tiny-basic
+⚠️ Partially misleading
+
+Reality:
+“Tiny BASIC” is a specific historical family:
+
+very constrained
+
+often no FOR/NEXT
+
+limited features
+
+microcomputer-oriented
+
+Your system:
+richer than Tiny BASIC
+
+VM-backed
+
+interpreter + runtime + devices
+
+👉 So this name undersells and misrepresents it.
+
+Option C — basic
+⚠️ Too generic
+
+ambiguous in a multi-language repo
+
+doesn’t communicate constraints
+
+Option D — sw-cor24-basic
+✅ Strong baseline choice
+
+Pros:
+consistent with your naming scheme
+
+clearly tied to your platform
+
+doesn’t overpromise compatibility
+
+leaves room for evolution
+
+Cons:
+doesn’t express flavor (but that’s okay—docs should)
+
+Option E — sw-cor24-tb
+❌ unclear and confusing
+
+Option F — sw-cor24-basic-ts (time-sharing)
+✅ good but maybe over-specific
+
+Option G — versioned dialect naming
+Example:
+
+sw-cor24-basic
+
+dialect: COR24 BASIC v1
+
+optional profiles later:
+
+basic-int
+
+basic-fp
+
+basic-ansi-lite
+
+This is actually the cleanest.
+
+Final naming recommendation
+Repository
+👉 sw-cor24-basic
+
+Internal dialect name (in docs)
+👉 “COR24 BASIC (v1)”
+
+Optional descriptive subtitle:
+
+“A 1970s-style time-sharing BASIC for the COR24 p-code VM”
+
+4) Define the flavor explicitly (this is the important part)
+Instead of chasing historical compatibility, define your own spec.
+
+COR24 BASIC v1 characteristics
+Core identity
+line-numbered
+
+interpreted
+
+integer-only
+
+terminal/teletype oriented
+
+text-based storage (paper-tape friendly)
+
+VM-backed execution
+
+Language core
+Statements
+LET
+
+PRINT
+
+INPUT
+
+IF ... THEN
+
+GOTO
+
+GOSUB / RETURN
+
+FOR / NEXT
+
+END
+
+REM
+
+Immediate commands
+LIST
+
+RUN
+
+NEW
+
+SAVE
+
+LOAD
+
+Functions
+PEEK
+
+POKE
+
+ABS
+
+Not included (v1)
+floating point
+
+arrays (optional later)
+
+string variables (optional later)
+
+file I/O beyond tape abstraction
+
+multi-statement lines (:)
+
+ANSI compliance
+
+Distinguishing traits (important)
+This is what makes it your BASIC:
+
+integer-first (non-ANSI)
+
+VM-based execution
+
+designed for hardware + interpreter coexistence
+
+debugger-friendly (your big advantage)
+
+clean layering over p-code
+
+5) Positioning relative to Pascal
+This is worth stating explicitly.
+
+Pascal
+compiled → p-code
+
+structured
+
+typed
+
+BASIC
+interpreted
+
+dynamic
+
+interactive
+
+system-facing (PEEK/POKE)
+
+They complement each other nicely:
+
+BASIC = monitor / scripting / bring-up
+
+Pascal = structured program development
+
+6) One clean definition you can put in README
+Here’s a solid description you can reuse:
+
+COR24 BASIC is a 1970s-inspired, line-numbered, integer-based BASIC interpreter designed for teletype-style interaction and paper-tape workflows. It runs on the COR24 p-code virtual machine and emphasizes simplicity, hardware access (PEEK/POKE), and incremental program development over strict compatibility with later BASIC standards.
+
+Final answer
+“BASIC77” is not a real standard → don’t use it
+
+You do NOT need floats in v1 → strongly avoid them
+
+You are building a custom time-sharing-style BASIC
+
+Best name: sw-cor24-basic
+
+Dialect name: “COR24 BASIC v1”
+
+If you want next, I can:
+
+define a precise grammar + tokenizer spec, or
+
+map BASIC execution onto your existing p-code primitives (line dispatch, expression eval, stacks, etc.), or
+
+design the tape SAVE/LOAD protocol in detail.
+
+
+
+

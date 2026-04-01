@@ -1,0 +1,30 @@
+[step]
+name = "005-program-store"
+status = "pending"
+prompt = """
+Implement the program store (basic_store) for managing stored BASIC lines.
+
+1. Create src/basic_store.pas with:
+   - Program area: packed sorted buffer of tokenized lines
+   - Line format: [line_number (word)][length (byte)][tokens...]
+   - store_line(line_num, token_buf, token_len): insert/replace line
+   - delete_line(line_num): remove line, shift subsequent lines down
+   - find_line(line_num): return pointer to line, or nil
+   - next_line(ptr): advance to next line in program area
+   - program_start, program_end, program_limit pointers
+   - Byte-level memory shifting for insert/delete (MEMCPY equivalent)
+
+2. Implement helper: memcpy_up and memcpy_down for shifting program
+   area contents during insert/delete.
+
+3. Test:
+   - Insert lines 30, 10, 20 → verify stored in order 10, 20, 30
+   - Replace line 20 with new content → verify replacement
+   - Delete line 20 → verify 10, 30 remain
+   - Insert at beginning, middle, end of program
+   - Find existing and non-existing line numbers
+   - Fill program area to capacity → OUT OF MEMORY error
+
+Reference: docs/design.md section on program storage
+Reference: docs/architecture.md section 3.1
+"""
