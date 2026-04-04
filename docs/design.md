@@ -447,22 +447,26 @@ Maximum depth: 16 (configurable at build time).
 Based on reading sw-cor24-pcode, these language-neutral primitives
 are not present but would benefit interpreter implementations:
 
-### 11.1 Strongly Recommended
+### 11.1 Now Available in VM
 
-| Primitive | Justification |
-|-----------|--------------|
-| **MEMCPY** (src, dst, len) | Line insertion/deletion shifts bytes; string copy; program relocation |
-| **MEMSET** (dst, val, len) | Clear program area; zero-fill buffers |
+These were added to sw-cor24-pcode as language-neutral opcodes:
 
-These can be implemented as p-code subroutines initially, promoted
-to VM opcodes if profiling shows they are hot paths.
+| Opcode | Primitive | Stack Effect | Used For |
+|--------|-----------|-------------|----------|
+| 0x70 | **MEMCPY** | ( src dst len -- ) | Line insertion/deletion, string copy |
+| 0x71 | **MEMSET** | ( dst val len -- ) | Clear program area, zero-fill buffers |
+| 0x72 | **MEMCMP** | ( a b len -- result ) | Keyword matching in tokenizer |
+| 0x73 | **JMP_IND** | ( addr -- ) | Dispatch table for statement handlers |
 
-### 11.2 Worth Considering
+MEMCPY uses memmove semantics (overlapping-safe). MEMCMP returns
+0 (equal), -1 (a<b), or 1 (a>b).
 
-| Primitive | Justification |
-|-----------|--------------|
-| **JMP_IND** (addr on stack) | Dispatch table for statement handlers and opcode handlers |
-| **MEMCMP** (a, b, len) | Keyword matching in tokenizer |
+### 11.2 Deferred
+
+| Primitive | Status |
+|-----------|--------|
+| **CALL_IND** | Not needed unless virtual dispatch required |
+| **FIND_BYTE** | Not needed unless token scanning is a bottleneck |
 
 ### 11.3 Keep Out of VM
 

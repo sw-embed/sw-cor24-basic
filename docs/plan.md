@@ -350,18 +350,19 @@ A test harness script (`demo.sh` or similar) that:
 | All arithmetic | Expression evaluation |
 | All comparisons | IF conditions, loop tests |
 
-### Missing — Implement as Library Routines
+### Recently Added to VM (available now)
 
-These will be implemented as Pascal procedures/p-code library routines.
-Document as feature requests for future VM opcodes if profiling shows
-they are performance-critical across multiple languages.
+| Opcode | Capability | Notes |
+|--------|-----------|-------|
+| 0x70 | MEMCPY | Block copy with memmove semantics |
+| 0x71 | MEMSET | Block fill |
+| 0x72 | MEMCMP | Lexicographic byte comparison |
+| 0x73 | JMP_IND | Indirect jump for dispatch tables |
+
+### Still Needed as Library Routines
 
 | Capability | Priority | Notes |
 |-----------|----------|-------|
-| MEMCPY | High | Line insertion/deletion in program store |
-| MEMSET | Medium | Clearing buffers and program area |
-| MEMCMP | Low | Keyword matching optimization |
-| JMP_IND | Low | Dispatch table optimization |
 | Integer-to-string | High | PRINT needs decimal output |
 | String-to-integer | High | INPUT and line number parsing |
 | Line input routine | High | Read until CR/LF with echo |
@@ -395,6 +396,7 @@ Sequential/serialized operation — BASIC runs, exits, returns to sws.
 No concurrent resource sharing needed.
 
 ### VM Extension Requests
-When library implementations of MEMCPY, MEMSET, JMP_IND prove to be
-bottlenecks, file requests against sw-cor24-pcode to add them as
-opcodes (0x70-0xFF range is reserved for future ops).
+MEMCPY (0x70), MEMSET (0x71), MEMCMP (0x72), and JMP_IND (0x73) have
+been added to the VM. Remaining candidates (CALL_IND, FIND_BYTE) are
+deferred unless profiling shows a need. Opcodes 0x74-0xFF remain
+reserved for future extensions.

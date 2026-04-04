@@ -1,31 +1,7 @@
-[step]
-name = "016-error-polish"
+number = 16
+slug = "016-error-polish"
 status = "pending"
-prompt = """
-Final polish on startup, error recovery, and interpreter state.
-
-1. Startup banner:
-   - "COR24 BASIC V1"
-   - Print available program memory (program_limit - program_start)
-   - "READY"
-
-2. Ensure error recovery is clean:
-   - After any error during RUN, return to REPL
-   - Program and variables preserved after error
-   - User can LIST, inspect variables, fix program
-
-3. Verify all interpreter state is debugger-friendly:
-   - All state in global variables (visible to p-code debugger)
-   - FOR stack contents inspectable
-   - GOSUB stack contents inspectable
-   - Variable table inspectable
-
-4. REM statement: verify listing reproduces original comment text
-
-5. Edge case testing:
-   - Empty program RUN → returns to READY immediately
-   - Single-line program
-   - Maximum line number (32767)
-   - Line number 0
-   - Very long lines (near token buffer limit)
-"""
+description = "Final polish on startup banner, error recovery, debugger-friendly state, REM reproduction in LIST, and edge case testing."
+role = "production"
+context_files = []
+created_at = "2026-04-01T13:06:00"

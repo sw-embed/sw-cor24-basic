@@ -1,25 +1,7 @@
-[step]
-name = "010-run-command"
+number = 10
+slug = "010-run-command"
 status = "pending"
-prompt = """
-Implement the RUN command for stored program execution.
-
-1. Implement RUN in basic_exec.pas:
-   - Clear variables, GOSUB stack, FOR stack
-   - Set current_line_ptr to program_start
-   - Set running flag
-   - Execute loop: for each line, dispatch first token to handler
-   - Advance to next_line_ptr after each line (unless GOTO/etc changed it)
-   - Stop on END, STOP, or end of program area
-
-2. Wire statement dispatch into the execution loop:
-   - Switch on first token → call appropriate handler
-   - Reuse all handlers from step 007 (PRINT, LET, POKE, INPUT)
-   - Unknown statement → SYNTAX ERROR with line number
-
-3. Test with simple programs:
-   - 10 PRINT "HELLO" / 20 END → prints HELLO
-   - 10 LET A=42 / 20 PRINT A / 30 END → prints 42
-   - Program with no END → stops at end of program area
-   - RUN twice → same output (state properly reset)
-"""
+description = "Implement the RUN command for stored program execution. Create basic_exec.pas with execution loop, statement dispatch, state reset. Test with simple programs."
+role = "production"
+context_files = []
+created_at = "2026-04-01T13:06:00"

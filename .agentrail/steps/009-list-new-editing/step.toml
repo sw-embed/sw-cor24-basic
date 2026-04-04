@@ -1,32 +1,7 @@
-[step]
-name = "009-list-new-editing"
+number = 9
+slug = "009-list-new-editing"
 status = "pending"
-prompt = """
-Implement LIST, NEW, and line editing commands.
-
-1. Implement LIST command in basic_stmt.pas:
-   - LIST: detokenize and print all stored lines
-   - LIST n: start listing from line n
-   - LIST n-m: list lines n through m
-   - Uses detokenizer from basic_detok.pas
-
-2. Implement NEW command:
-   - Clear program area (reset program_end to program_start)
-   - Clear variables and stacks
-
-3. Implement line editing in the REPL:
-   - Numbered line with content: tokenize and store (insert/replace)
-   - Bare line number (no content): delete that line
-   - Verify insertion sorts correctly
-
-4. Implement BYE command:
-   - Print goodbye message
-   - Halt VM
-
-5. Test:
-   - Enter lines out of order, LIST shows sorted
-   - Replace a line, LIST shows new content
-   - Delete a line by entering bare number
-   - NEW clears everything, LIST shows nothing
-   - BYE exits cleanly
-"""
+description = "Implement LIST, NEW, line editing, and BYE commands. LIST with optional range, NEW clears program, bare line number deletes line, BYE halts VM."
+role = "production"
+context_files = []
+created_at = "2026-04-01T13:06:00"

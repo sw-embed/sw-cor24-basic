@@ -1,0 +1,1 @@
+Spec docs (prd.md, architecture.md, design.md, plan.md) were created in a prior session. Fixed agentrail saga.toml and all 17 step.toml files to match v0.1.0 format (flat keys, no table headers).

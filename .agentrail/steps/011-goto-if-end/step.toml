@@ -1,33 +1,7 @@
-[step]
-name = "011-goto-if-end"
+number = 11
+slug = "011-goto-if-end"
 status = "pending"
-prompt = """
-Implement GOTO, IF...THEN, END, and STOP statements.
-
-1. Implement stmt_goto():
-   - Parse line number from token stream (integer literal)
-   - Search program area for target line
-   - Set current_line_ptr to found line
-   - BAD LINE NUMBER if not found
-
-2. Implement stmt_if():
-   - Evaluate condition expression
-   - Expect THEN token
-   - If condition non-zero: parse line number, execute as GOTO
-   - If condition zero: advance to next line (skip)
-
-3. Implement stmt_end():
-   - Clear running flag, return to REPL
-
-4. Implement stmt_stop():
-   - Set stopped flag
-   - Print "STOPPED AT LINE nnn"
-   - Return to REPL (CONT not implemented in v1)
-
-5. Test:
-   - Counter: 10 A=1 / 20 PRINT A / 30 A=A+1 / 40 IF A<=10 THEN 20
-     / 50 END → prints 1 through 10
-   - GOTO to non-existent line → BAD LINE NUMBER
-   - STOP mid-program → shows line number, returns to READY
-   - IF with false condition → skips correctly
-"""
+description = "Implement GOTO, IF...THEN, END, and STOP statements. GOTO searches program area. IF evaluates condition and jumps on true. END/STOP return to REPL."
+role = "production"
+context_files = []
+created_at = "2026-04-01T13:06:00"

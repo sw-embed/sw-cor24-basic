@@ -246,16 +246,15 @@ interpreters. Status based on current VM (sw-cor24-pcode):
 | `trap` | **Present** | Trap with code exists |
 | `sys` (PUTC/GETC) | **Present** | Console I/O exists |
 | `sys` (ALLOC/FREE) | **Present** | Heap allocation exists |
-| MEMCPY | **Missing** | Block copy — useful for line insertion |
-| MEMSET | **Missing** | Block fill — useful for NEW/clear |
-| JMP_IND | **Missing** | Indirect jump — useful for dispatch |
-| CALL_IND | **Missing** | Indirect call — useful for dispatch |
-| MEMCMP | **Missing** | Block compare — useful for keyword match |
-| FIND_BYTE | **Missing** | Byte scan — useful for token scanning |
+| MEMCPY (0x70) | **Present** | Block copy with memmove semantics |
+| MEMSET (0x71) | **Present** | Block fill |
+| MEMCMP (0x72) | **Present** | Lexicographic byte comparison |
+| JMP_IND (0x73) | **Present** | Indirect jump for dispatch tables |
+| CALL_IND | **Missing** | Indirect call — defer unless needed |
+| FIND_BYTE | **Missing** | Byte scan — defer unless needed |
 
-Missing primitives can be implemented in p-code library routines.
-Whether to promote them to VM opcodes depends on profiling across
-multiple language implementations.
+MEMCPY, MEMSET, MEMCMP, and JMP_IND were added to the VM as part
+of the interpreter-assisting primitives feature request.
 
 ## 7. Module Breakdown
 

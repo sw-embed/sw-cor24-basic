@@ -1,32 +1,7 @@
-[step]
-name = "002-toolchain-validation"
-status = "pending"
-prompt = """
-Validate that the Pascal toolchain can build the BASIC interpreter.
-
-BLOCKER: This step requires p24p Phase 1 (procedures, functions,
-arrays, var params, char type). Check p24p status first. If Phase 1
-is not complete, document what's missing and pause.
-
-If p24p Phase 1 IS ready:
-
-1. Write a small Pascal test program (tests/toolchain_test.pas) that
-   exercises features BASIC will need:
-   - Procedures with parameters
-   - Functions returning values
-   - Array declarations and indexing
-   - Char/byte manipulation
-   - sys PUTC/GETC via inline assembly or runtime calls
-   - Global variables and constants
-
-2. Build pipeline: p24p → pl24r (link with runtime) → pa24r → .p24
-
-3. Run on emulator via pvm.s. Verify output.
-
-4. Catalog sw-cor24-pascal/runtime/ routines — identify what BASIC
-   can reuse vs what needs custom implementation.
-
-5. Create scripts/build.sh for the BASIC build pipeline.
-
-6. Document any p24p issues found as bug reports / feature requests.
-"""
+number = 2
+slug = "002-toolchain-validation"
+status = "in-progress"
+description = "Validate that the Pascal toolchain can build the BASIC interpreter. BLOCKER: requires p24p Phase 1. Write a small Pascal test program exercising procedures, arrays, char manipulation. Build pipeline: p24p → pl24r → pa24r → .p24. Run on emulator."
+role = "production"
+context_files = []
+created_at = "2026-04-01T13:06:00"

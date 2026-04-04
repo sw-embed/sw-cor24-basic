@@ -1,56 +1,7 @@
-[step]
-name = "007-immediate-statements"
+number = 7
+slug = "007-immediate-statements"
 status = "pending"
-prompt = """
-Implement core statement handlers for immediate-mode use.
-
-1. Create src/basic_stmt.pas with statement handlers:
-
-   stmt_print():
-   - Evaluate and print expressions as decimal integers
-   - Print string literals directly
-   - Comma: tab to next 14-character column
-   - Semicolon: no separator
-   - Trailing semicolon suppresses newline
-   - Newline at end otherwise
-
-   stmt_let():
-   - Parse variable token, expect = operator, evaluate expression
-   - Store result in variable table
-
-   stmt_implicit_let():
-   - Same as LET but without the LET keyword
-   - Triggered when first token is a variable
-
-   stmt_poke():
-   - Evaluate address expression
-   - Expect comma
-   - Evaluate value expression
-   - Write low 8 bits to address via storeb
-
-   stmt_input():
-   - Optional string prompt: INPUT "prompt";A
-   - Default prompt: ? followed by space
-   - Read line from terminal
-   - Parse integer from input
-   - Store in variable
-
-2. Create src/basic_io.pas with:
-   - print_char(ch): write one byte via sys PUTC
-   - print_string(buf, len): write string bytes
-   - print_integer(n): convert to decimal, print (handle negative)
-   - print_newline(): CR+LF
-   - read_line(buf, maxlen): read chars until CR/LF, with echo
-   - parse_integer(buf): string to integer conversion
-
-3. Test in immediate mode:
-   - PRINT 2+3*4 → "14"
-   - PRINT "HELLO" → "HELLO"
-   - LET A=5 then PRINT A → "5"
-   - A=10 then PRINT A → "10" (implicit LET)
-   - POKE 65280,1 → LED on
-   - PRINT PEEK(65281) → UART status
-   - INPUT A then PRINT A → round-trip
-
-Reference: docs/design.md section 3
-"""
+description = "Implement core statement handlers for immediate-mode use: PRINT, LET, implicit LET, POKE, INPUT. Also create basic_io.pas with print_char, print_string, print_integer, print_newline, read_line, parse_integer."
+role = "production"
+context_files = []
+created_at = "2026-04-01T13:06:00"

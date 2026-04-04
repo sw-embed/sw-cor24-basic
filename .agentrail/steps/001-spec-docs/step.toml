@@ -1,20 +1,8 @@
-[step]
-name = "001-spec-docs"
-status = "pending"
-prompt = """
-Create specification and design documents for COR24 BASIC v1.
-
-1. Read docs/research.txt thoroughly — extract all design decisions.
-2. Read sw-cor24-pcode VM design to understand available opcodes,
-   memory model, sys calls, and trap mechanisms.
-3. Create docs/prd.md — product requirements document.
-4. Create docs/architecture.md — layering, memory layout, modules.
-5. Create docs/design.md — tokenizer spec, parser design, statement
-   handlers, PEEK/POKE, I/O model, runtime state, stack designs.
-6. Create docs/plan.md — implementation phases, testing strategy,
-   VM dependencies, toolchain dogfooding strategy.
-7. Create README.md — project overview, architecture, status.
-8. Ask user design questions and incorporate answers.
-9. Create agentrail saga with steps.
-10. Commit and push.
-"""
+number = 1
+slug = "001-spec-docs"
+status = "completed"
+description = "Create specification and design documents for COR24 BASIC v1. Read docs/research.txt, read sw-cor24-pcode VM design, create docs/prd.md, docs/architecture.md, docs/design.md, docs/plan.md, and README.md."
+role = "production"
+context_files = []
+created_at = "2026-04-01T13:06:00"
+completed_at = "2026-04-01T20:26:25"

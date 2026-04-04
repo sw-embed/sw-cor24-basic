@@ -1,36 +1,7 @@
-[step]
-name = "017-hardware-demos"
+number = 17
+slug = "017-hardware-demos"
 status = "pending"
-prompt = """
-Create hardware demo programs and run full validation.
-
-1. Create tests/demo/ directory with BASIC programs:
-   - hello.bas: Hello World (PRINT + END)
-   - count.bas: Count loop (FOR/NEXT)
-   - blink.bas: LED blink (POKE + GOSUB delay)
-   - uart.bas: UART poll (PEEK + IF/GOTO)
-   - memdump.bas: Memory dump (INPUT + PEEK + FOR)
-
-2. Create scripts/demo.sh test harness:
-   - For each demo program, pipe input via UART to interpreter
-   - Capture output
-   - Compare against expected output files
-   - Report pass/fail
-
-3. Run all demos on emulator and verify correct output.
-
-4. Verify PEEK/POKE against MMIO:
-   - POKE to LED D2 port → LED state changes
-   - PEEK of SW2 port → returns button state
-   - PEEK of UART status → returns correct flags
-
-5. Performance check:
-   - Is the interpreter fast enough for interactive use?
-   - Does the count loop (FOR 1 TO 1000) complete in reasonable time?
-   - Any obvious performance issues?
-
-6. Update README.md with final status and any known limitations.
-
-7. If all demos pass and interpreter is functional, this saga is
-   complete. Mark done with agentrail complete --done.
-"""
+description = "Create hardware demo programs (hello, count, blink, uart, memdump), test harness, run validation on emulator, verify PEEK/POKE MMIO, performance check, update README."
+role = "production"
+context_files = []
+created_at = "2026-04-01T13:06:00"

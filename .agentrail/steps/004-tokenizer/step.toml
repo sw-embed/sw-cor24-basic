@@ -1,30 +1,7 @@
-[step]
-name = "004-tokenizer"
+number = 4
+slug = "004-tokenizer"
 status = "pending"
-prompt = """
-Implement the BASIC tokenizer (basic_lex).
-
-1. Create src/basic_lex.pas with tokenize() procedure:
-   - Input: source line in input_buffer (byte array)
-   - Output: token bytes in token_buffer, line number if present
-   - Skip leading whitespace
-   - Detect and parse line number (digits at start)
-   - Keyword recognition: case-insensitive match against keyword table
-   - Integer literal parsing: decimal digits → 0xE0 + 3-byte value
-   - String literal parsing: "..." → 0xE1 + length + bytes
-   - Variable recognition: single letter A-Z → 0xC0-0xD9
-   - Operator recognition: +, -, *, /, =, <>, <, <=, >, >=
-   - Delimiter recognition: (, ), comma, semicolon
-   - REM: after REM keyword, store rest of line as string token
-   - Emit 0x00 end-of-line token
-
-2. Test with known inputs:
-   - Tokenize "PRINT 1+2" → TOK_PRINT, INT(1), OP_PLUS, INT(2), EOL
-   - Tokenize "10 GOTO 200" → line=10, TOK_GOTO, INT(200), EOL
-   - Tokenize 'POKE 65280,1' → TOK_POKE, INT(65280), COMMA, INT(1), EOL
-   - Tokenize 'REM THIS IS A COMMENT' → TOK_REM, STRING("THIS IS..."), EOL
-   - Tokenize 'LET A=5' → TOK_LET, VAR_A, OP_EQ, INT(5), EOL
-   - Tokenize 'A=5' → VAR_A, OP_EQ, INT(5), EOL (implicit LET)
-
-Reference: docs/design.md section 1
-"""
+description = "Implement the BASIC tokenizer (basic_lex). Create src/basic_lex.pas with tokenize() procedure handling keywords, integers, strings, variables, operators, delimiters, REM, and end-of-line."
+role = "production"
+context_files = []
+created_at = "2026-04-01T13:06:00"

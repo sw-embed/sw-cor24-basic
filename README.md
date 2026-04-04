@@ -49,11 +49,19 @@ BASIC complements Pascal in the COR24 ecosystem:
 
 ## Status
 
-**In development** — specification and design phase.
+**Blocked** — toolchain validation complete, waiting on p24p features.
 
-Implementation is blocked on p24p (Pascal compiler) Phase 1, which
-adds procedures, arrays, and records needed to write the interpreter.
-The project dogfoods the full toolchain: tc24r → p24p → BASIC.
+The end-to-end pipeline works (`.pas → p24p → .spc → pl24r → pa24r →
+.p24 → pvm.s`) — validated with `tests/toolchain/basic_minimal.pas`.
+However, the BASIC interpreter requires p24p features that don't exist
+yet:
+
+| Feature    | sw-cor24-pascal issue | Status  |
+|------------|----------------------|---------|
+| Procedures | #1                   | Blocked |
+| Arrays     | #2                   | Blocked |
+| Char type  | #3                   | Blocked |
+| peek/poke  | #5                   | Needed  |
 
 ## Dependencies
 
