@@ -30,8 +30,12 @@ trap "rm -rf $TMP" EXIT
 echo "=== Compiling $NAME.pas ==="
 
 # Step 1: Compile Pascal to .spc
-SPC_OUTPUT=$(printf '%s\x04' "$(cat "$PAS")" | \
-  cor24-run --run "$P24P_S" --terminal --speed 0 -n 200000000 2>&1)
+# Use -u flag (UART input buffer) instead of piped --terminal to avoid
+# blocking on UART reads after input is exhausted. Filter out [UART RX]
+# debug lines from the output.
+SPC_OUTPUT=$(cor24-run --run "$P24P_S" --stack-kilobytes 8 \
+  -u "$(cat "$PAS")"$'\x04' \
+  --speed 0 -n 500000000 2>&1 | grep -v '^\[UART')
 
 if ! echo "$SPC_OUTPUT" | grep -q "; OK"; then
   echo "Compilation failed:" >&2
@@ -39,7 +43,8 @@ if ! echo "$SPC_OUTPUT" | grep -q "; OK"; then
   exit 1
 fi
 
-echo "$SPC_OUTPUT" | sed -n '/^\.module/,/^\.endmodule/p' > "$TMP/$NAME.spc"
+# Extract .spc content (handle "UART output: .module" prefix from -u mode)
+echo "$SPC_OUTPUT" | sed 's/^UART output: //' | sed -n '/^\.module/,/^\.endmodule/p' > "$TMP/$NAME.spc"
 echo "  .spc: $(wc -l < "$TMP/$NAME.spc") lines"
 
 # Step 2: Link with runtime

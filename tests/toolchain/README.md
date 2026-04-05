@@ -26,12 +26,13 @@ with 12+ user procedures).
 
 ## Known Issues
 
-### p24p compiler performance cliff
-Programs with 12 user-defined procedures hang when the main block
-exceeds ~14 statements. The compiler appears to enter an infinite
-loop (billions of instructions with no output). Filed against
-sw-cor24-pascal.
-
 ### pvm.s globals segment too small (sw-cor24-pcode #1)
 The PVM allocates only 8 words (24 bytes) for globals. Programs
 with arrays need much more. Using pv24t as workaround.
+
+## Build Notes
+
+- Use `-u` flag (not piped `--terminal`) to feed source to p24p —
+  piped terminal blocks on UART reads after input is exhausted.
+- Use `--stack-kilobytes 8` for p24p — the compiler needs more than
+  the default 3KB stack for larger programs.
