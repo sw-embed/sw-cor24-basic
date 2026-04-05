@@ -1,6 +1,6 @@
 number = 3
 slug = "003-token-definitions"
-status = "pending"
+status = "in-progress"
 description = "Implement token definitions and keyword table for the BASIC tokenizer. Create src/basic_tokens.pas with token type constants and keyword string table. Create src/basic_detok.pas with detokenizer."
 role = "production"
 context_files = []

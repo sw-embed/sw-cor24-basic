@@ -49,19 +49,18 @@ BASIC complements Pascal in the COR24 ecosystem:
 
 ## Status
 
-**Blocked** — toolchain validation complete, waiting on p24p features.
+**In progress** — token definitions and keyword table implemented.
 
-The end-to-end pipeline works (`.pas → p24p → .spc → pl24r → pa24r →
-.p24 → pvm.s`) — validated with `tests/toolchain/basic_minimal.pas`.
-However, the BASIC interpreter requires p24p features that don't exist
-yet:
+Pipeline: `.pas → p24p → .spc → pl24r → pa24r → .p24 → pv24t`
 
-| Feature    | sw-cor24-pascal issue | Status  |
-|------------|----------------------|---------|
-| Procedures | #1                   | Blocked |
-| Arrays     | #2                   | Blocked |
-| Char type  | #3                   | Blocked |
-| peek/poke  | #5                   | Needed  |
+Token definitions (`src/basic_tokens.pas`) compile and pass all tests:
+keyword table, classification functions, and detokenizer for keywords,
+operators, and variables.
+
+Known toolchain limitations:
+- p24p hangs on programs >155 lines with 12+ user procedures
+- pvm.s globals segment too small for arrays (sw-cor24-pcode #1);
+  using pv24t trace interpreter as workaround
 
 ## Dependencies
 

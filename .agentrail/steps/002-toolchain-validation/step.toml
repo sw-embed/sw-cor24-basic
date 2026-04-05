@@ -1,7 +1,8 @@
 number = 2
 slug = "002-toolchain-validation"
-status = "in-progress"
+status = "completed"
 description = "Validate that the Pascal toolchain can build the BASIC interpreter. BLOCKER: requires p24p Phase 1. Write a small Pascal test program exercising procedures, arrays, char manipulation. Build pipeline: p24p → pl24r → pa24r → .p24. Run on emulator."
 role = "production"
 context_files = []
 created_at = "2026-04-01T13:06:00"
+completed_at = "2026-04-04T15:25:31"
