@@ -49,7 +49,6 @@ begin tl:=0;lp:=0;tn:=-1;
  while lp<ll do begin
   while(lp<ll)and((lb[lp]=' ')or(lb[lp]=chr(9)))do lp:=lp+1;
   if lp<ll then begin c:=lb[lp];
-   { keyword match }
    b:=-1;bl:=0;k:=0;
    while k<NK do begin n:=kl(k);
     if(n>bl)and(lp+n<=ll)then begin ok:=true;j:=0;
@@ -177,6 +176,7 @@ begin ep:=0;err:=0;t:=tb[ep];
  if t=0 then begin end
  else if t=FK then begin ep:=ep+1;do_let end
  else if t=FK+1 then begin ep:=ep+1;do_print end
+ else if t=FK+17 then pe:=0
  else if t=FK+20 then running:=0
  else if(t>=VA)and(t<=VA+25)then do_let
  else err:=2;
@@ -185,5 +185,7 @@ begin ep:=0;err:=0;t:=tb[ep];
 begin
  ik;pe:=0;running:=1;mi:=0;while mi<26 do begin vars[mi]:=0;mi:=mi+1 end;
  while running=1 do begin writechar('>');read_line;
-  if ll>0 then begin tokenize;if tn>=0 then store_ins(tn) else dispatch end end
+  if ll>0 then begin tokenize;
+   if tn>=0 then store_ins(tn)
+   else dispatch end end
 end.

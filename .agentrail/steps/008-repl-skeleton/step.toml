@@ -1,7 +1,8 @@
 number = 8
 slug = "008-repl-skeleton"
-status = "in-progress"
+status = "completed"
 description = "Implement the REPL skeleton. Create basic_repl.pas with main loop, basic_errors.pas with error codes/messages, basic_main.pas entry point, basic_runtime.pas with interpreter state. First end-to-end milestone."
 role = "production"
 context_files = []
 created_at = "2026-04-01T13:06:00"
+completed_at = "2026-04-06T12:47:22"

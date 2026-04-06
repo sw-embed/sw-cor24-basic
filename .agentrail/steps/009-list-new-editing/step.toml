@@ -1,6 +1,6 @@
 number = 9
 slug = "009-list-new-editing"
-status = "pending"
+status = "in-progress"
 description = "Implement LIST, NEW, line editing, and BYE commands. LIST with optional range, NEW clears program, bare line number deletes line, BYE halts VM."
 role = "production"
 context_files = []
