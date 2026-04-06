@@ -1,6 +1,6 @@
 number = 5
 slug = "005-program-store"
-status = "pending"
+status = "in-progress"
 description = "Implement the program store (basic_store) for managing stored BASIC lines. Packed sorted buffer of tokenized lines with insert, delete, find, next operations and byte-level memory shifting."
 role = "production"
 context_files = []
