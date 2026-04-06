@@ -1,0 +1,1 @@
+Implement the INPUT statement now that the interpreter is split into units and size is no longer a constraint. INPUT var reads an integer from UART. INPUT with string prompt prints the prompt first. Handle ?REDO on bad input. Also implement implicit LET (bare variable assignment without LET keyword). Test with interactive input via pv24t or emulator.

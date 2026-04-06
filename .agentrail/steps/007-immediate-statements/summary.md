@@ -1,0 +1,1 @@
+Implemented PRINT, LET, POKE statement handlers (src/basic_stmt.pas) with embedded expression parser. PRINT handles integer expressions, string literals, semicolon/comma separators. LET does variable assignment. POKE writes byte to address. print_int handles signed integers. 7 tests pass. Discovered p24p limitations: no local arrays, empty string literals generate invalid .spc.
