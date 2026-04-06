@@ -1,6 +1,6 @@
 number = 7
 slug = "007-immediate-statements"
-status = "pending"
+status = "in-progress"
 description = "Implement core statement handlers for immediate-mode use: PRINT, LET, implicit LET, POKE, INPUT. Also create basic_io.pas with print_char, print_string, print_integer, print_newline, read_line, parse_integer."
 role = "production"
 context_files = []

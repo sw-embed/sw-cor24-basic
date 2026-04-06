@@ -1,0 +1,1 @@
+Implemented expression parser (src/basic_expr.pas): single recursive p_expr(level) with 4 precedence levels. Handles int literals, variables, parens, PEEK, ABS, all operators, unary minus, div-by-zero. 12 tests pass. Filed p24c#7 (forward declarations) and p24c#8 (nested procedures) for missing Pascal features.
