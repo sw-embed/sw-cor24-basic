@@ -1,6 +1,6 @@
 number = 4
 slug = "004-tokenizer"
-status = "pending"
+status = "in-progress"
 description = "Implement the BASIC tokenizer (basic_lex). Create src/basic_lex.pas with tokenize() procedure handling keywords, integers, strings, variables, operators, delimiters, REM, and end-of-line."
 role = "production"
 context_files = []

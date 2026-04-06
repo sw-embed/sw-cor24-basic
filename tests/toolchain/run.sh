@@ -4,14 +4,12 @@
 #
 # Pipeline: .pas → p24p → .spc → pl24r → pa24r → .p24 → pv24t
 #
-# Uses pv24t (trace interpreter) instead of pvm.s because pvm.s has
-# a fixed 8-word globals segment that's too small for programs with
-# arrays (see sw-cor24-pcode issue #1).
+# Limitation: p24p reads source via UART. The -u flag has an effective
+# ~4KB limit after shell expansion. Keep source files under 4KB.
 set -euo pipefail
 
 PAS="${1:?Usage: $0 <file.pas>}"
 
-# Tool paths (sibling repos under sw-embed)
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
 REPO_DIR="$(cd "$SCRIPT_DIR/../.." && pwd)"
 EMBED_DIR="$(cd "$REPO_DIR/.." && pwd)"
@@ -27,12 +25,13 @@ TMP="/tmp/basic_tc_$$"
 mkdir -p "$TMP"
 trap "rm -rf $TMP" EXIT
 
+SIZE=$(wc -c < "$PAS")
+if [ "$SIZE" -gt 4500 ]; then
+  echo "WARNING: $NAME.pas is ${SIZE} bytes (>4KB). May fail due to UART buffer limit." >&2
+fi
+
 echo "=== Compiling $NAME.pas ==="
 
-# Step 1: Compile Pascal to .spc
-# Use -u flag (UART input buffer) instead of piped --terminal to avoid
-# blocking on UART reads after input is exhausted. Filter out [UART RX]
-# debug lines from the output.
 SPC_OUTPUT=$(cor24-run --run "$P24P_S" --stack-kilobytes 8 \
   -u "$(cat "$PAS")"$'\x04' \
   --speed 0 -n 500000000 2>&1 | grep -v '^\[UART')
@@ -43,18 +42,14 @@ if ! echo "$SPC_OUTPUT" | grep -q "; OK"; then
   exit 1
 fi
 
-# Extract .spc content (handle "UART output: .module" prefix from -u mode)
 echo "$SPC_OUTPUT" | sed 's/^UART output: //' | sed -n '/^\.module/,/^\.endmodule/p' > "$TMP/$NAME.spc"
 echo "  .spc: $(wc -l < "$TMP/$NAME.spc") lines"
 
-# Step 2: Link with runtime
 "$PL24R" "$RUNTIME" "$TMP/$NAME.spc" -o "$TMP/${NAME}_linked.spc" 2>&1 | grep -v "^warning:" || true
 echo "  Linked OK"
 
-# Step 3: Assemble to .p24
 "$PA24R" "$TMP/${NAME}_linked.spc" -o "$TMP/$NAME.p24" 2>&1
 echo "  Assembled OK"
 
-# Step 4: Run on pv24t (trace interpreter)
 echo "=== Running ==="
 "$PV24T" "$TMP/$NAME.p24" 2>&1

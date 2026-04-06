@@ -49,18 +49,18 @@ BASIC complements Pascal in the COR24 ecosystem:
 
 ## Status
 
-**In progress** — token definitions and keyword table implemented.
+**In progress** — tokenizer implemented and tested.
 
 Pipeline: `.pas → p24p → .spc → pl24r → pa24r → .p24 → pv24t`
 
-Token definitions (`src/basic_tokens.pas`) compile and pass all tests:
-keyword table, classification functions, and detokenizer for keywords,
-operators, and variables.
+- `src/basic_tokens.pas` — token definitions, keyword table, detokenizer
+- `src/basic_lex.pas` — tokenizer (keywords, integers, strings, variables,
+  operators, delimiters, REM, line numbers)
 
 Known toolchain limitations:
-- p24p hangs on programs >155 lines with 12+ user procedures
-- pvm.s globals segment too small for arrays (sw-cor24-pcode #1);
-  using pv24t trace interpreter as workaround
+- p24p UART input limited to ~3.5KB per compilation; source files must
+  be compact (use `--stack-kilobytes 8` and `-u` flag)
+- pvm.s globals too small for arrays (sw-cor24-pcode #1); using pv24t
 
 ## Dependencies
 
