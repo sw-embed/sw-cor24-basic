@@ -1,6 +1,6 @@
 number = 6
 slug = "006-expression-parser"
-status = "pending"
+status = "in-progress"
 description = "Implement the expression parser (basic_expr) using precedence climbing. Four precedence levels for comparisons, add/sub, mul/div, unary. Also create basic_vars.pas with 26-element variable table."
 role = "production"
 context_files = []

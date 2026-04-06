@@ -1,0 +1,1 @@
+Implemented program store (src/basic_store.pas): 4KB packed sorted buffer with insert/delete/find/replace/traversal. 16 tests pass. Updated run.sh to use pre-assembled p24p.bin (doubles source limit to ~8KB). Created docs/basic-interpreter-modules.md documenting 9-module interpreter architecture and separate compilation strategy.
