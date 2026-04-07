@@ -22,13 +22,9 @@ begin p:=i*KW;kt[p]:=a;kt[p+1]:=b;kt[p+2]:=c;kt[p+3]:=d;
 procedure ik;
 begin
  ks(0,'L','E','T',' ',' ',' ',' ',' ');ks(1,'P','R','I','N','T',' ',' ',' ');
- ks(2,'I','N','P','U','T',' ',' ',' ');ks(3,'I','F',' ',' ',' ',' ',' ',' ');
- ks(4,'T','H','E','N',' ',' ',' ',' ');ks(5,'G','O','T','O',' ',' ',' ',' ');
- ks(6,'G','O','S','U','B',' ',' ',' ');ks(7,'R','E','T','U','R','N',' ',' ');
- ks(8,'F','O','R',' ',' ',' ',' ',' ');ks(9,'T','O',' ',' ',' ',' ',' ',' ');
- ks(10,'S','T','E','P',' ',' ',' ',' ');ks(11,'N','E','X','T',' ',' ',' ',' ');
- ks(12,'S','T','O','P',' ',' ',' ',' ');ks(13,'E','N','D',' ',' ',' ',' ',' ');
- ks(14,'R','E','M',' ',' ',' ',' ',' ');ks(15,'L','I','S','T',' ',' ',' ',' ');
+ ks(3,'I','F',' ',' ',' ',' ',' ',' ');ks(4,'T','H','E','N',' ',' ',' ',' ');
+ ks(5,'G','O','T','O',' ',' ',' ',' ');ks(12,'S','T','O','P',' ',' ',' ',' ');
+ ks(13,'E','N','D',' ',' ',' ',' ',' ');ks(14,'R','E','M',' ',' ',' ',' ',' ');
  ks(16,'R','U','N',' ',' ',' ',' ',' ');ks(17,'N','E','W',' ',' ',' ',' ',' ');
  ks(20,'B','Y','E',' ',' ',' ',' ',' ')
 end;
@@ -166,16 +162,23 @@ begin if(tb[ep]>=VA)and(tb[ep]<=VA+25)then begin vi:=tb[ep]-VA;ep:=ep+1;
 end else err:=1 end;
 
 procedure dispatch;
-var t:integer;
-begin ep:=0;err:=0;t:=tb[ep];
+var t,rd:integer;
+begin ep:=0;err:=0;rd:=1;
+while(rd=1)and(err=0)do begin rd:=0;t:=tb[ep];
  if t=0 then begin end
  else if t=FK then begin ep:=ep+1;do_let end
  else if t=FK+1 then begin ep:=ep+1;do_print end
+ else if t=FK+3 then begin ep:=ep+1;p_expr(4);
+  if(err=0)and(tb[ep]=FK+4)then begin ep:=ep+1;if ev<>0 then rd:=1 end
+  else if err=0 then err:=1 end
+ else if t=FK+5 then begin ep:=ep+1;p_expr(4);
+  if err=0 then begin lp:=store_find(ev);if lp<0 then err:=3 else tl:=lp end end
+ else if(t=FK+12)or(t=FK+13)then mi:=0
  else if t=FK+16 then begin mi:=1;tl:=0 end
  else if t=FK+17 then pe:=0
  else if t=FK+20 then running:=0
  else if(t>=VA)and(t<=VA+25)then do_let
- else err:=2;
+ else err:=2 end;
  if err<>0 then begin write('?ERR ');writeln(err) end end;
 
 begin

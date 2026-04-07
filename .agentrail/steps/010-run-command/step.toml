@@ -1,7 +1,8 @@
 number = 10
 slug = "010-run-command"
-status = "in-progress"
+status = "completed"
 description = "Implement the RUN command for stored program execution. Create basic_exec.pas with execution loop, statement dispatch, state reset. Test with simple programs."
 role = "production"
 context_files = []
 created_at = "2026-04-01T13:06:00"
+completed_at = "2026-04-07T15:29:25"

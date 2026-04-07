@@ -1,6 +1,6 @@
 number = 11
 slug = "011-goto-if-end"
-status = "pending"
+status = "in-progress"
 description = "Implement GOTO, IF...THEN, END, and STOP statements. GOTO searches program area. IF evaluates condition and jumps on true. END/STOP return to REPL."
 role = "production"
 context_files = []
