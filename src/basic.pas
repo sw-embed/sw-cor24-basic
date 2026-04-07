@@ -30,9 +30,7 @@ begin
  ks(12,'S','T','O','P',' ',' ',' ',' ');ks(13,'E','N','D',' ',' ',' ',' ',' ');
  ks(14,'R','E','M',' ',' ',' ',' ',' ');ks(15,'L','I','S','T',' ',' ',' ',' ');
  ks(16,'R','U','N',' ',' ',' ',' ',' ');ks(17,'N','E','W',' ',' ',' ',' ',' ');
- ks(18,'S','A','V','E',' ',' ',' ',' ');ks(19,'L','O','A','D',' ',' ',' ',' ');
- ks(20,'B','Y','E',' ',' ',' ',' ',' ');ks(21,'P','E','E','K',' ',' ',' ',' ');
- ks(22,'P','O','K','E',' ',' ',' ',' ');ks(23,'A','B','S',' ',' ',' ',' ',' ')
+ ks(20,'B','Y','E',' ',' ',' ',' ',' ')
 end;
 
 function kl(i:integer):integer;
@@ -115,9 +113,6 @@ if lev=0 then begin v:=0;
  else if(tb[ep]>=VA)and(tb[ep]<=VA+25)then begin v:=vars[tb[ep]-VA];ep:=ep+1 end
  else if tb[ep]=176 then begin ep:=ep+1;p_expr(4);v:=ev;
   if(err=0)and(tb[ep]=177)then ep:=ep+1 else if err=0 then err:=1 end
- else if tb[ep]=FK+23 then begin ep:=ep+1;
-  if tb[ep]=176 then begin ep:=ep+1;p_expr(4);v:=ev;if v<0 then v:=0-v;
-  if(err=0)and(tb[ep]=177)then ep:=ep+1 else if err=0 then err:=1 end else err:=1 end
  else err:=1;ev:=v end
 else if lev=1 then begin
  if tb[ep]=TP+1 then begin ep:=ep+1;p_expr(1);ev:=0-ev end
@@ -176,6 +171,7 @@ begin ep:=0;err:=0;t:=tb[ep];
  if t=0 then begin end
  else if t=FK then begin ep:=ep+1;do_let end
  else if t=FK+1 then begin ep:=ep+1;do_print end
+ else if t=FK+16 then begin mi:=1;tl:=0 end
  else if t=FK+17 then pe:=0
  else if t=FK+20 then running:=0
  else if(t>=VA)and(t<=VA+25)then do_let
@@ -183,9 +179,15 @@ begin ep:=0;err:=0;t:=tb[ep];
  if err<>0 then begin write('?ERR ');writeln(err) end end;
 
 begin
- ik;pe:=0;running:=1;mi:=0;while mi<26 do begin vars[mi]:=0;mi:=mi+1 end;
- while running=1 do begin writechar('>');read_line;
-  if ll>0 then begin tokenize;
-   if tn>=0 then store_ins(tn)
-   else dispatch end end
+ ik;pe:=0;running:=1;mi:=0;ep:=0;while ep<26 do begin vars[ep]:=0;ep:=ep+1 end;
+ tl:=0;
+ while running=1 do begin
+  if mi=1 then begin
+   if tl<pe then begin ll:=ord(pg[tl+2]);lp:=0;
+    while lp<ll do begin tb[lp]:=ord(pg[tl+3+lp]);lp:=lp+1 end;
+    tl:=tl+3+ll;dispatch;if err<>0 then mi:=0
+   end else mi:=0
+  end else begin writechar('>');read_line;
+   if ll>0 then begin tokenize;
+    if tn>=0 then store_ins(tn) else dispatch end end end
 end.
