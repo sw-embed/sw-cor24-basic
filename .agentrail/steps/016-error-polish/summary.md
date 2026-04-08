@@ -1,0 +1,1 @@
+Polish pass: startup banner, LIST detokenizer with last-class spacing tracker, REM reproduction in LIST + REM no-op at runtime (was ?ERR 2), errors now include executing line via new el global ('?ERR n IN m'), and run-basic.sh prompt-stripping fixed (sed instead of tr to preserve '>' operator). Source 11987 bytes.
