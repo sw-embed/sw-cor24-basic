@@ -1,6 +1,6 @@
 number = 14
 slug = "014-print-formatting"
-status = "pending"
+status = "in-progress"
 description = "Polish PRINT formatting: column tracking, comma tab stops at 14-char intervals, semicolon suppression, trailing semicolon suppresses newline, mixed string/expression output."
 role = "production"
 context_files = []

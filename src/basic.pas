@@ -17,7 +17,7 @@ fv:array[0..15]of integer;
 fl:array[0..15]of integer;
 fs:array[0..15]of integer;
 fr:array[0..15]of integer;
-gp,fp,running,mi:integer;
+gp,fp,col,running,mi:integer;
 procedure ks(i:integer;a,b,c,d,e,f:char);
 var p:integer;
 begin p:=i*KW;kt[p]:=a;kt[p+1]:=b;kt[p+2]:=c;kt[p+3]:=d;kt[p+4]:=e;kt[p+5]:=f end;
@@ -130,27 +130,40 @@ else if op=TP+6 then b:=(v<r) else if op=TP+7 then b:=(v<=r)
 else if op=TP+8 then b:=(v>r) else if op=TG then b:=(v>=r);
 if b then v:=1 else v:=0 end;ev:=v end
 end;
+procedure pc(c:char);
+begin writechar(c);col:=col+1 end;
+procedure pn;
+begin writeln;col:=0 end;
+procedure pt;
+var k:integer;
+begin if col>=70 then pn else begin k:=14-(col-(col div 14)*14);
+while k>0 do begin pc(' ');k:=k-1 end end end;
 procedure print_int(n:integer);
 var i,nd:integer;
-begin if n<0 then begin writechar('-');n:=0-n end;
-if n=0 then writechar('0')
+begin if n<0 then begin pc('-');n:=0-n end;
+if n=0 then pc('0')
 else begin nd:=0;while n>0 do begin pid[nd]:=n mod 10;nd:=nd+1;n:=n div 10 end;
-i:=nd-1;while i>=0 do begin writechar(chr(pid[i]+48));i:=i-1 end end end;
+i:=nd-1;while i>=0 do begin pc(chr(pid[i]+48));i:=i-1 end end end;
 procedure read_line;
 var c:integer;
 begin ll:=0;readln(c);
 while(c<>10)and(c<>13)and(c<>4)and(ll<80)do
 begin lb[ll]:=chr(c);ll:=ll+1;readln(c) end end;
 procedure do_print;
-var dn,n,i:integer;
-begin dn:=0;if tb[ep]=0 then begin writeln;dn:=1 end;
+var dn,nl,n,i:integer;
+begin dn:=0;nl:=1;
+if tb[ep]=0 then begin pn;dn:=1 end;
 while(err=0)and(dn=0)do begin
 if tb[ep]=TS then begin ep:=ep+1;n:=tb[ep];ep:=ep+1;i:=0;
-while i<n do begin writechar(chr(tb[ep]));ep:=ep+1;i:=i+1 end end
-else begin p_expr(4);print_int(ev) end;
-if tb[ep]=179 then ep:=ep+1
-else if tb[ep]=178 then begin ep:=ep+1;writechar(chr(9)) end
-else begin writeln;dn:=1 end end end;
+while i<n do begin pc(chr(tb[ep]));ep:=ep+1;i:=i+1 end end
+else begin p_expr(4);if err=0 then print_int(ev) end;
+if err<>0 then dn:=1
+else if tb[ep]=179 then begin ep:=ep+1;
+if tb[ep]=0 then begin nl:=0;dn:=1 end end
+else if tb[ep]=178 then begin ep:=ep+1;pt;
+if tb[ep]=0 then begin nl:=0;dn:=1 end end
+else dn:=1 end;
+if(err=0)and(nl=1)then pn end;
 procedure do_let;
 var vi:integer;
 begin if(tb[ep]>=VA)and(tb[ep]<=VA+25)then begin vi:=tb[ep]-VA;ep:=ep+1;
@@ -193,7 +206,7 @@ else if(t>=VA)and(t<=VA+25)then do_let
 else err:=2 end;
 if err<>0 then begin write('?ERR ');writeln(err) end end;
 begin
-ik;pe:=0;running:=1;mi:=0;gp:=0;fp:=0;ep:=0;while ep<26 do begin vars[ep]:=0;ep:=ep+1 end;
+ik;pe:=0;running:=1;mi:=0;gp:=0;fp:=0;col:=0;ep:=0;while ep<26 do begin vars[ep]:=0;ep:=ep+1 end;
 tl:=0;
 while running=1 do begin
 if mi=1 then begin

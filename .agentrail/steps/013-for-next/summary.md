@@ -1,0 +1,1 @@
+Implemented FOR/NEXT with 16-slot stack (parallel fv/fl/fs/fr arrays). Default STEP=1, sign-aware bound check supports negative steps. Tested simple/negative/stride/nested/error cases. RUN resets fp. Source 8955 bytes; fits comfortably after p24p buffer bump.
