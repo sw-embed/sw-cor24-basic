@@ -1,6 +1,6 @@
 number = 13
 slug = "013-for-next"
-status = "pending"
+status = "in-progress"
 description = "Implement FOR...TO...STEP and NEXT statements. FOR stack with parallel arrays for var, limit, step, restart. Support default STEP=1 and negative steps."
 role = "production"
 context_files = []

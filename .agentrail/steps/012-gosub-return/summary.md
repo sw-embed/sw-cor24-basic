@@ -1,0 +1,1 @@
+Added GOSUB/RETURN with 64-slot stack; err 6=overflow, 7=return without gosub. Compacted monolith (KW 8->6, dedented) to 8030 bytes to stay under UART limit.

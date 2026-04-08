@@ -17,5 +17,9 @@ if [ ! -f "$P24" ]; then
   exit 1
 fi
 
-# Feed .bas content as UART input, strip all > prompts
-"$PV24T" "$P24" -i "$(cat "$BAS")" -n 10000000 2>&1 | tr -d '>' | grep -v '^$'
+# Feed .bas content as UART input, strip all > prompts.
+# Append EOT (\x04) so the final line terminates cleanly even if the
+# file lacks a trailing newline after BYE — otherwise read_line blocks
+# waiting for more UART input and the run appears to hang.
+INPUT="$(cat "$BAS")"$'\n\x04'
+"$PV24T" "$P24" -i "$INPUT" -n 10000000 2>&1 | tr -d '>' | grep -v '^$'

@@ -13,7 +13,11 @@ ep,err,ev:integer;
 vars:array[0..25]of integer;
 pid:array[0..9]of integer;
 gs:array[0..63]of integer;
-gp,running,mi:integer;
+fv:array[0..15]of integer;
+fl:array[0..15]of integer;
+fs:array[0..15]of integer;
+fr:array[0..15]of integer;
+gp,fp,running,mi:integer;
 procedure ks(i:integer;a,b,c,d,e,f:char);
 var p:integer;
 begin p:=i*KW;kt[p]:=a;kt[p+1]:=b;kt[p+2]:=c;kt[p+3]:=d;kt[p+4]:=e;kt[p+5]:=f end;
@@ -22,7 +26,9 @@ begin
 ks(0,'L','E','T',' ',' ',' ');ks(1,'P','R','I','N','T',' ');
 ks(3,'I','F',' ',' ',' ',' ');ks(4,'T','H','E','N',' ',' ');
 ks(5,'G','O','T','O',' ',' ');ks(6,'G','O','S','U','B',' ');
-ks(7,'R','E','T','U','R','N');ks(12,'S','T','O','P',' ',' ');
+ks(7,'R','E','T','U','R','N');ks(8,'F','O','R',' ',' ',' ');
+ks(9,'T','O',' ',' ',' ',' ');ks(10,'S','T','E','P',' ',' ');
+ks(11,'N','E','X','T',' ',' ');ks(12,'S','T','O','P',' ',' ');
 ks(13,'E','N','D',' ',' ',' ');ks(14,'R','E','M',' ',' ',' ');
 ks(16,'R','U','N',' ',' ',' ');ks(17,'N','E','W',' ',' ',' ');
 ks(20,'B','Y','E',' ',' ',' ')
@@ -151,7 +157,7 @@ begin if(tb[ep]>=VA)and(tb[ep]<=VA+25)then begin vi:=tb[ep]-VA;ep:=ep+1;
 if tb[ep]=TP+4 then begin ep:=ep+1;p_expr(4);vars[vi]:=ev end else err:=1
 end else err:=1 end;
 procedure dispatch;
-var t,rd:integer;
+var t,rd,vi:integer;
 begin ep:=0;err:=0;rd:=1;
 while(rd=1)and(err=0)do begin rd:=0;t:=tb[ep];
 if t=0 then begin end
@@ -166,15 +172,28 @@ else if t=FK+6 then begin ep:=ep+1;p_expr(4);
 if(err=0)and(gp>=64)then err:=6 else if err=0 then begin gs[gp]:=tl;gp:=gp+1;
 lp:=store_find(ev);if lp<0 then err:=3 else tl:=lp end end
 else if t=FK+7 then if gp=0 then err:=7 else begin gp:=gp-1;tl:=gs[gp] end
+else if t=FK+8 then begin ep:=ep+1;
+if(tb[ep]>=VA)and(tb[ep]<=VA+25)then begin vi:=tb[ep]-VA;ep:=ep+1;
+if tb[ep]=TP+4 then begin ep:=ep+1;p_expr(4);vars[vi]:=ev;
+if(err=0)and(tb[ep]=FK+9)then begin ep:=ep+1;p_expr(4);
+if err=0 then begin if fp>=16 then err:=8 else begin
+fl[fp]:=ev;
+if tb[ep]=FK+10 then begin ep:=ep+1;p_expr(4);fs[fp]:=ev end else fs[fp]:=1;
+fv[fp]:=vi;fr[fp]:=tl;fp:=fp+1 end end end
+else if err=0 then err:=1 end else err:=1 end else err:=1 end
+else if t=FK+11 then if fp=0 then err:=9 else begin
+vi:=fp-1;vars[fv[vi]]:=vars[fv[vi]]+fs[vi];
+if((fs[vi]>=0)and(vars[fv[vi]]<=fl[vi]))or((fs[vi]<0)and(vars[fv[vi]]>=fl[vi]))
+then tl:=fr[vi] else fp:=fp-1 end
 else if(t=FK+12)or(t=FK+13)then mi:=0
-else if t=FK+16 then begin mi:=1;tl:=0;gp:=0 end
+else if t=FK+16 then begin mi:=1;tl:=0;gp:=0;fp:=0 end
 else if t=FK+17 then pe:=0
 else if t=FK+20 then running:=0
 else if(t>=VA)and(t<=VA+25)then do_let
 else err:=2 end;
 if err<>0 then begin write('?ERR ');writeln(err) end end;
 begin
-ik;pe:=0;running:=1;mi:=0;gp:=0;ep:=0;while ep<26 do begin vars[ep]:=0;ep:=ep+1 end;
+ik;pe:=0;running:=1;mi:=0;gp:=0;fp:=0;ep:=0;while ep<26 do begin vars[ep]:=0;ep:=ep+1 end;
 tl:=0;
 while running=1 do begin
 if mi=1 then begin
