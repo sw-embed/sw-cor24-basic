@@ -1,7 +1,8 @@
 number = 18
 slug = "unit-build-pipeline"
-status = "in-progress"
+status = "completed"
 description = "Refactor the build pipeline for p-code unit compilation. Update tests/toolcha..."
 role = "production"
 context_files = []
 created_at = "2026-04-05T19:01:31"
+completed_at = "2026-04-08T15:39:38"

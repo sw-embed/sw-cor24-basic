@@ -1,0 +1,1 @@
+SUPERSEDED. INPUT statement was already implemented in step 015 with default '? ' prompt, custom prompts via INPUT "msg";V, ?REDO loop on bad parse, and signed-integer parsing. Step 015 pulled the work forward once the 16KB p24p buffer (sw-cor24-pascal#2) made it fit alongside the rest of the v1 features without needing the unit split. Closing without code changes.

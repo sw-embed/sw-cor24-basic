@@ -1,6 +1,6 @@
 number = 21
 slug = "startrek-spec"
-status = "pending"
+status = "in-progress"
 description = "Write a clean-room Star Trek game specification at docs/startrek-spec.md, bas..."
 role = "production"
 context_files = []

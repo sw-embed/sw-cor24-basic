@@ -1,0 +1,1 @@
+SUPERSEDED. See step 018 for the rationale: dropping the unit-split plan because (1) Pascal units aren't standard, (2) the original 8KB p24p source cap that motivated the split is already lifted to 16KB (sw-cor24-pascal#2), and (3) the monolith at 12.4KB has plenty of headroom for all v1 features and Star Trek. Closing without code changes.
