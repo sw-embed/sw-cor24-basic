@@ -17,13 +17,14 @@ fv:array[0..15]of integer;
 fl:array[0..15]of integer;
 fs:array[0..15]of integer;
 fr:array[0..15]of integer;
-gp,fp,col,running,mi:integer;
+gp,fp,col,pok,running,mi:integer;
 procedure ks(i:integer;a,b,c,d,e,f:char);
 var p:integer;
 begin p:=i*KW;kt[p]:=a;kt[p+1]:=b;kt[p+2]:=c;kt[p+3]:=d;kt[p+4]:=e;kt[p+5]:=f end;
 procedure ik;
 begin
 ks(0,'L','E','T',' ',' ',' ');ks(1,'P','R','I','N','T',' ');
+ks(2,'I','N','P','U','T',' ');
 ks(3,'I','F',' ',' ',' ',' ');ks(4,'T','H','E','N',' ',' ');
 ks(5,'G','O','T','O',' ',' ');ks(6,'G','O','S','U','B',' ');
 ks(7,'R','E','T','U','R','N');ks(8,'F','O','R',' ',' ',' ');
@@ -149,6 +150,17 @@ var c:integer;
 begin ll:=0;readln(c);
 while(c<>10)and(c<>13)and(c<>4)and(ll<80)do
 begin lb[ll]:=chr(c);ll:=ll+1;readln(c) end end;
+procedure pi;
+var i,n,s:integer;
+begin
+i:=0;while(i<ll)and((lb[i]=' ')or(lb[i]=chr(9)))do i:=i+1;
+s:=1;
+if(i<ll)and(lb[i]='-')then begin s:=-1;i:=i+1 end
+else if(i<ll)and(lb[i]='+')then i:=i+1;
+n:=0;pok:=0;
+while(i<ll)and(lb[i]>='0')and(lb[i]<='9')do
+begin n:=n*10+ord(lb[i])-48;i:=i+1;pok:=1 end;
+ev:=n*s end;
 procedure do_print;
 var dn,nl,n,i:integer;
 begin dn:=0;nl:=1;
@@ -170,12 +182,21 @@ begin if(tb[ep]>=VA)and(tb[ep]<=VA+25)then begin vi:=tb[ep]-VA;ep:=ep+1;
 if tb[ep]=TP+4 then begin ep:=ep+1;p_expr(4);vars[vi]:=ev end else err:=1
 end else err:=1 end;
 procedure dispatch;
-var t,rd,vi:integer;
+var t,rd,vi,n,i:integer;
 begin ep:=0;err:=0;rd:=1;
 while(rd=1)and(err=0)do begin rd:=0;t:=tb[ep];
 if t=0 then begin end
 else if t=FK then begin ep:=ep+1;do_let end
 else if t=FK+1 then begin ep:=ep+1;do_print end
+else if t=FK+2 then begin ep:=ep+1;
+if tb[ep]=TS then begin ep:=ep+1;n:=tb[ep];ep:=ep+1;i:=0;
+while i<n do begin pc(chr(tb[ep]));ep:=ep+1;i:=i+1 end;
+if(tb[ep]=179)or(tb[ep]=178)then ep:=ep+1 end
+else begin pc('?');pc(' ') end;
+if(tb[ep]>=VA)and(tb[ep]<=VA+25)then begin vi:=tb[ep]-VA;ep:=ep+1;
+read_line;pi;
+while pok=0 do begin pc('?');pc('R');pc('E');pc('D');pc('O');pc(' ');read_line;pi end;
+vars[vi]:=ev end else err:=1 end
 else if t=FK+3 then begin ep:=ep+1;p_expr(4);
 if(err=0)and(tb[ep]=FK+4)then begin ep:=ep+1;if ev<>0 then rd:=1 end
 else if err=0 then err:=1 end

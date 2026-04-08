@@ -1,6 +1,6 @@
 number = 15
 slug = "015-input-enhancements"
-status = "pending"
+status = "in-progress"
 description = "Enhance INPUT statement with custom prompts, ?REDO on bad input, negative number handling. Polish error messages with consistent format."
 role = "production"
 context_files = []
