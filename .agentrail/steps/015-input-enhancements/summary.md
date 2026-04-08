@@ -1,0 +1,1 @@
+Implemented INPUT statement (was deferred to step 020 under old 8KB cap; now fits). Supports default '? ' prompt, custom prompt via INPUT "msg";V, ?REDO loop on bad parse, negative numbers via signed pi parser. Source 10084 bytes.

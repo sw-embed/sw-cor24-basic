@@ -17,7 +17,7 @@ fv:array[0..15]of integer;
 fl:array[0..15]of integer;
 fs:array[0..15]of integer;
 fr:array[0..15]of integer;
-gp,fp,col,pok,running,mi:integer;
+gp,fp,col,pok,el,running,mi:integer;
 procedure ks(i:integer;a,b,c,d,e,f:char);
 var p:integer;
 begin p:=i*KW;kt[p]:=a;kt[p+1]:=b;kt[p+2]:=c;kt[p+3]:=d;kt[p+4]:=e;kt[p+5]:=f end;
@@ -31,7 +31,8 @@ ks(7,'R','E','T','U','R','N');ks(8,'F','O','R',' ',' ',' ');
 ks(9,'T','O',' ',' ',' ',' ');ks(10,'S','T','E','P',' ',' ');
 ks(11,'N','E','X','T',' ',' ');ks(12,'S','T','O','P',' ',' ');
 ks(13,'E','N','D',' ',' ',' ');ks(14,'R','E','M',' ',' ',' ');
-ks(16,'R','U','N',' ',' ',' ');ks(17,'N','E','W',' ',' ',' ');
+ks(15,'L','I','S','T',' ',' ');ks(16,'R','U','N',' ',' ',' ');
+ks(17,'N','E','W',' ',' ',' ');
 ks(20,'B','Y','E',' ',' ',' ')
 end;
 function kl(i:integer):integer;
@@ -181,6 +182,46 @@ var vi:integer;
 begin if(tb[ep]>=VA)and(tb[ep]<=VA+25)then begin vi:=tb[ep]-VA;ep:=ep+1;
 if tb[ep]=TP+4 then begin ep:=ep+1;p_expr(4);vars[vi]:=ev end else err:=1
 end else err:=1 end;
+procedure do_list;
+var p,n,ln,j,tk,k,kn,i,lc:integer;rem:boolean;
+begin p:=0;
+while p<pe do begin
+ln:=ord(pg[p])*256+ord(pg[p+1]);n:=ord(pg[p+2]);
+print_int(ln);pc(' ');rem:=false;lc:=0;j:=0;
+while j<n do begin tk:=ord(pg[p+3+j]);
+if(tk>=FK)and(tk<FK+NK)then begin k:=tk-FK;kn:=kl(k);
+if lc=1 then pc(' ');
+i:=0;while i<kn do begin pc(kt[k*KW+i]);i:=i+1 end;
+if k=14 then rem:=true;
+lc:=1;j:=j+1 end
+else if tk=TS then begin j:=j+1;kn:=ord(pg[p+3+j]);j:=j+1;
+if(lc=1)and(not rem)then pc(' ');
+if not rem then pc('"');
+i:=0;while i<kn do begin pc(chr(ord(pg[p+3+j])));j:=j+1;i:=i+1 end;
+if not rem then pc('"');rem:=false;lc:=0 end
+else if tk=TI then begin j:=j+1;
+if lc=1 then pc(' ');
+ln:=ord(pg[p+3+j])*65536+ord(pg[p+3+j+1])*256+ord(pg[p+3+j+2]);
+print_int(ln);j:=j+3;lc:=1 end
+else if(tk>=VA)and(tk<=VA+25)then begin
+if lc=1 then pc(' ');
+pc(chr(65+tk-VA));j:=j+1;lc:=1 end
+else if tk=176 then begin pc('(');j:=j+1;lc:=0 end
+else if tk=177 then begin pc(')');j:=j+1;lc:=0 end
+else if tk=178 then begin pc(',');j:=j+1;lc:=0 end
+else if tk=179 then begin pc(';');j:=j+1;lc:=0 end
+else if tk=TP then begin pc('+');j:=j+1;lc:=0 end
+else if tk=TP+1 then begin pc('-');j:=j+1;lc:=0 end
+else if tk=TP+2 then begin pc('*');j:=j+1;lc:=0 end
+else if tk=TP+3 then begin pc('/');j:=j+1;lc:=0 end
+else if tk=TP+4 then begin pc('=');j:=j+1;lc:=0 end
+else if tk=TP+5 then begin pc('<');pc('>');j:=j+1;lc:=0 end
+else if tk=TP+6 then begin pc('<');j:=j+1;lc:=0 end
+else if tk=TP+7 then begin pc('<');pc('=');j:=j+1;lc:=0 end
+else if tk=TP+8 then begin pc('>');j:=j+1;lc:=0 end
+else if tk=TG then begin pc('>');pc('=');j:=j+1;lc:=0 end
+else j:=j+1
+end;pn;p:=p+3+n end end;
 procedure dispatch;
 var t,rd,vi,n,i:integer;
 begin ep:=0;err:=0;rd:=1;
@@ -220,22 +261,27 @@ vi:=fp-1;vars[fv[vi]]:=vars[fv[vi]]+fs[vi];
 if((fs[vi]>=0)and(vars[fv[vi]]<=fl[vi]))or((fs[vi]<0)and(vars[fv[vi]]>=fl[vi]))
 then tl:=fr[vi] else fp:=fp-1 end
 else if(t=FK+12)or(t=FK+13)then mi:=0
+else if t=FK+14 then begin end
 else if t=FK+16 then begin mi:=1;tl:=0;gp:=0;fp:=0 end
+else if t=FK+15 then do_list
 else if t=FK+17 then pe:=0
 else if t=FK+20 then running:=0
 else if(t>=VA)and(t<=VA+25)then do_let
 else err:=2 end;
-if err<>0 then begin write('?ERR ');writeln(err) end end;
+if err<>0 then begin write('?ERR ');print_int(err);
+if el>0 then begin write(' IN ');print_int(el) end;pn end end;
 begin
-ik;pe:=0;running:=1;mi:=0;gp:=0;fp:=0;col:=0;ep:=0;while ep<26 do begin vars[ep]:=0;ep:=ep+1 end;
+ik;pe:=0;running:=1;mi:=0;gp:=0;fp:=0;col:=0;el:=0;ep:=0;while ep<26 do begin vars[ep]:=0;ep:=ep+1 end;
+write('COR24 BASIC V1');pn;write('READY');pn;
 tl:=0;
 while running=1 do begin
 if mi=1 then begin
-if tl<pe then begin ll:=ord(pg[tl+2]);lp:=0;
+if tl<pe then begin
+el:=ord(pg[tl])*256+ord(pg[tl+1]);ll:=ord(pg[tl+2]);lp:=0;
 while lp<ll do begin tb[lp]:=ord(pg[tl+3+lp]);lp:=lp+1 end;
 tl:=tl+3+ll;dispatch;if err<>0 then mi:=0
 end else mi:=0
-end else begin writechar('>');read_line;
+end else begin el:=0;writechar('>');read_line;
 if ll>0 then begin tokenize;
 if tn>=0 then store_ins(tn) else dispatch end end end
 end.

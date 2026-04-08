@@ -1,6 +1,6 @@
 number = 16
 slug = "016-error-polish"
-status = "pending"
+status = "in-progress"
 description = "Final polish on startup banner, error recovery, debugger-friendly state, REM reproduction in LIST, and edge case testing."
 role = "production"
 context_files = []

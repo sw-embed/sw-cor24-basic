@@ -1,0 +1,7 @@
+number = 25
+slug = "fix-abs-bug"
+status = "pending"
+description = "Fix the ABS function bug (sw-embed/sw-cor24-basic#1). ABS(expr) currently fal..."
+role = "production"
+context_files = []
+created_at = "2026-04-08T13:37:44"
