@@ -1,6 +1,6 @@
 number = 12
 slug = "012-gosub-return"
-status = "pending"
+status = "in-progress"
 description = "Implement GOSUB and RETURN statements. GOSUB stack of 64 line pointers with push/pop. Test nested subroutines and error conditions."
 role = "production"
 context_files = []

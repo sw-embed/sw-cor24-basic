@@ -1,7 +1,8 @@
 number = 11
 slug = "011-goto-if-end"
-status = "in-progress"
+status = "completed"
 description = "Implement GOTO, IF...THEN, END, and STOP statements. GOTO searches program area. IF evaluates condition and jumps on true. END/STOP return to REPL."
 role = "production"
 context_files = []
 created_at = "2026-04-01T13:06:00"
+completed_at = "2026-04-07T16:51:15"
