@@ -1,6 +1,6 @@
 number = 18
 slug = "unit-build-pipeline"
-status = "pending"
+status = "in-progress"
 description = "Refactor the build pipeline for p-code unit compilation. Update tests/toolcha..."
 role = "production"
 context_files = []

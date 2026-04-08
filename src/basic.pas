@@ -34,7 +34,7 @@ ks(13,'E','N','D',' ',' ',' ');ks(14,'R','E','M',' ',' ',' ');
 ks(15,'L','I','S','T',' ',' ');ks(16,'R','U','N',' ',' ',' ');
 ks(17,'N','E','W',' ',' ',' ');
 ks(20,'B','Y','E',' ',' ',' ');ks(21,'P','E','E','K',' ',' ');
-ks(22,'P','O','K','E',' ',' ')
+ks(22,'P','O','K','E',' ',' ');ks(23,'A','B','S',' ',' ',' ')
 end;
 function kl(i:integer):integer;
 var p,n:integer;
@@ -114,6 +114,11 @@ else if tb[ep]=176 then begin ep:=ep+1;p_expr(4);v:=ev;
 if(err=0)and(tb[ep]=177)then ep:=ep+1 else if err=0 then err:=1 end
 else if tb[ep]=FK+21 then begin ep:=ep+1;
 if tb[ep]=176 then begin ep:=ep+1;p_expr(4);v:=peek(ev);
+if(err=0)and(tb[ep]=177)then ep:=ep+1 else if err=0 then err:=1
+end else err:=1 end
+else if tb[ep]=FK+23 then begin ep:=ep+1;
+if tb[ep]=176 then begin ep:=ep+1;p_expr(4);v:=ev;
+if v<0 then v:=0-v;
 if(err=0)and(tb[ep]=177)then ep:=ep+1 else if err=0 then err:=1
 end else err:=1 end
 else err:=1;ev:=v end
