@@ -14,6 +14,8 @@ needed) and runs the corresponding `examples/<name>.bas` through
 ./scripts/demo-fizzbuzz.sh
 ./scripts/demo-fibonacci.sh
 ./scripts/demo-factorial.sh
+./scripts/demo-count.sh
+./scripts/demo-memdump.sh
 ```
 
 Each script feeds the `.bas` file to the interpreter as if it were
@@ -29,6 +31,9 @@ so they run end-to-end and exit cleanly.
 | `demo-fizzbuzz.sh` | `examples/fizzbuzz.bas` | `FOR`/`NEXT`, `IF`...`THEN GOTO`, divisibility via `(I/N)*N=I`, multi-target dispatch. |
 | `demo-fibonacci.sh` | `examples/fibonacci.bas` | Iterative two-variable swap inside `FOR`/`NEXT`. First 10 Fibonacci numbers. |
 | `demo-factorial.sh` | `examples/factorial.bas` | Iterative product accumulator inside `FOR`/`NEXT`. Mixed-type `PRINT` of `N;"!=";F`. |
+| `demo-count.sh` | `examples/count.bas` | Minimal `FOR`/`NEXT` smoke test, counts 1..10. |
+| `demo-memdump.sh` | `examples/memdump.bas` | `POKE` then `PEEK` round-trip on a low scratch address. Demonstrates the byte-MMIO syntax. |
+| *(no wrapper)* | `examples/blink.bas` | LED blink loop targeting the COR24 LED MMIO at `0xFF0000`. **Hardware/cor24-emu only** — `pv24t` traps because the address is outside its VM memory. |
 
 ## Demo Notes
 
@@ -80,6 +85,46 @@ millions.
 `N!` via straight `FOR I=1 TO N` accumulation. With `N=7` you get
 `5040`. The 24-bit integer ceiling caps you at `12!` (479,001,600);
 `13!` overflows.
+
+### count.bas
+
+The smallest stored-program example: `FOR I=1 TO 10 / PRINT I / NEXT`.
+Useful as a baseline when poking at the build pipeline.
+
+### memdump.bas
+
+Pokes the bytes `72`, `73`, `33` ('H', 'I', '!') into addresses
+`100..102`, then loops with `PEEK(I)` to print each byte:
+
+```
+100=72
+101=73
+102=33
+```
+
+The address range is just regular `pv24t` VM memory; no MMIO. The
+demo exists to show that the language form `POKE addr,val` and
+`PEEK(addr)` round-trips correctly. For real MMIO targets, see
+`blink.bas`.
+
+### blink.bas — hardware only
+
+`POKE 16711680,0` then `POKE 16711680,1` toggles bit 0 at COR24's
+`IO_LEDSWDAT` register (`0xFF0000`), where LED D2 lives. On real
+hardware (or `cor24-emu`) this physically blinks the LED.
+
+**Under `pv24t` it traps.** The host-side p-code interpreter only
+allocates linear VM memory and `0xFF0000` is far outside the
+allocated region. There is intentionally **no `demo-blink.sh`
+wrapper** — running it would just trap. To exercise it, target the
+emulator/hardware p-code VM (`pvm.s`) instead of `pv24t`. That path
+isn't wired into `build-basic.sh` yet; it'll come with the unit
+build pipeline (steps 018–019) which produces a `.p24m` image
+loadable by `cor24-emu`.
+
+Same caveat applies to `LED`/switch-style demos in general: under
+`pv24t` the LED syscall (`sys 3`) is a no-op and `READ_SWITCH`
+(`sys 6`) always returns 0.
 
 ## Recursion?
 

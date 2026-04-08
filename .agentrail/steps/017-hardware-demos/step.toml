@@ -1,6 +1,6 @@
 number = 17
 slug = "017-hardware-demos"
-status = "pending"
+status = "in-progress"
 description = "Create hardware demo programs (hello, count, blink, uart, memdump), test harness, run validation on emulator, verify PEEK/POKE MMIO, performance check, update README."
 role = "production"
 context_files = []

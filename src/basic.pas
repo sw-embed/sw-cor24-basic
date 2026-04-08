@@ -33,7 +33,8 @@ ks(11,'N','E','X','T',' ',' ');ks(12,'S','T','O','P',' ',' ');
 ks(13,'E','N','D',' ',' ',' ');ks(14,'R','E','M',' ',' ',' ');
 ks(15,'L','I','S','T',' ',' ');ks(16,'R','U','N',' ',' ',' ');
 ks(17,'N','E','W',' ',' ',' ');
-ks(20,'B','Y','E',' ',' ',' ')
+ks(20,'B','Y','E',' ',' ',' ');ks(21,'P','E','E','K',' ',' ');
+ks(22,'P','O','K','E',' ',' ')
 end;
 function kl(i:integer):integer;
 var p,n:integer;
@@ -111,6 +112,10 @@ if tb[ep]=TI then begin ep:=ep+1;v:=tb[ep]*65536+tb[ep+1]*256+tb[ep+2];ep:=ep+3 
 else if(tb[ep]>=VA)and(tb[ep]<=VA+25)then begin v:=vars[tb[ep]-VA];ep:=ep+1 end
 else if tb[ep]=176 then begin ep:=ep+1;p_expr(4);v:=ev;
 if(err=0)and(tb[ep]=177)then ep:=ep+1 else if err=0 then err:=1 end
+else if tb[ep]=FK+21 then begin ep:=ep+1;
+if tb[ep]=176 then begin ep:=ep+1;p_expr(4);v:=peek(ev);
+if(err=0)and(tb[ep]=177)then ep:=ep+1 else if err=0 then err:=1
+end else err:=1 end
 else err:=1;ev:=v end
 else if lev=1 then begin
 if tb[ep]=TP+1 then begin ep:=ep+1;p_expr(1);ev:=0-ev end
@@ -266,6 +271,10 @@ else if t=FK+16 then begin mi:=1;tl:=0;gp:=0;fp:=0 end
 else if t=FK+15 then do_list
 else if t=FK+17 then pe:=0
 else if t=FK+20 then running:=0
+else if t=FK+22 then begin ep:=ep+1;p_expr(4);
+if err=0 then begin n:=ev;
+if tb[ep]=178 then begin ep:=ep+1;p_expr(4);
+if err=0 then poke(n,ev) end else err:=1 end end
 else if(t>=VA)and(t<=VA+25)then do_let
 else err:=2 end;
 if err<>0 then begin write('?ERR ');print_int(err);

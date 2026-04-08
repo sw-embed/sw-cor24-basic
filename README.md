@@ -49,18 +49,48 @@ BASIC complements Pascal in the COR24 ecosystem:
 
 ## Status
 
-**In progress** — tokenizer implemented and tested.
+**v1 in progress** — interpreter is end-to-end functional under
+`pv24t`. All v1 statements work: LET, PRINT (with column-aware
+formatting), INPUT (with `?REDO`), IF...THEN, GOTO, GOSUB/RETURN,
+FOR/TO/STEP/NEXT, REM, STOP, END, PEEK/POKE. Commands LIST, RUN,
+NEW, BYE all work.
 
 Pipeline: `.pas → p24p → .spc → pl24r → pa24r → .p24 → pv24t`
 
-- `src/basic_tokens.pas` — token definitions, keyword table, detokenizer
-- `src/basic_lex.pas` — tokenizer (keywords, integers, strings, variables,
-  operators, delimiters, REM, line numbers)
+The whole interpreter currently lives in a single file
+`src/basic.pas`. Splitting into p-code units (steps 018–019) is
+queued and will lift the remaining single-file source ceiling.
 
-Known toolchain limitations:
-- p24p UART input limited to ~3.5KB per compilation; source files must
-  be compact (use `--stack-kilobytes 8` and `-u` flag)
-- pvm.s globals too small for arrays (sw-cor24-pcode #1); using pv24t
+Known limitations:
+- Source ceiling: p24p input buffer is currently 16384 bytes
+  (bumped from 8192 in sw-cor24-pascal#2). Step 018/019 will
+  remove this entirely via the unit build.
+- LED MMIO and switch input are no-ops under `pv24t`. Real
+  hardware paths via `cor24-emu` aren't wired into the build yet.
+- One known runtime bug: ABS not initialized in keyword table
+  (sw-cor24-basic#1).
+
+## Building and running
+
+```sh
+./scripts/build-basic.sh        # compile src/basic.pas to build/basic.p24
+./scripts/run-basic.sh examples/hello.bas
+```
+
+## Demos
+
+Six CLI demos under `scripts/demo-*.sh`. See [docs/demos.md](docs/demos.md)
+for the full gallery.
+
+```sh
+./scripts/demo-hello.sh
+./scripts/demo-calc.sh
+./scripts/demo-fizzbuzz.sh
+./scripts/demo-fibonacci.sh
+./scripts/demo-factorial.sh
+./scripts/demo-count.sh
+./scripts/demo-memdump.sh
+```
 
 ## Dependencies
 
@@ -72,6 +102,7 @@ Known toolchain limitations:
 
 ## Documentation
 
+- [Demo gallery](docs/demos.md)
 - [Product Requirements](docs/prd.md)
 - [Architecture](docs/architecture.md)
 - [Design](docs/design.md)
