@@ -1,18 +1,19 @@
 program Basic;
 const
-FK=128;TP=160;TG=169;VA=192;TI=224;TS=225;KW=6;NK=24;PS=4096;
+FK=128;TP=160;TG=169;VA=192;TI=224;TS=225;KW=6;NK=24;PS=8192;
 var
 kt:array[0..143]of char;
 lb:array[0..79]of char;
 ll,lp:integer;
 tb:array[0..127]of integer;
 tl,tn:integer;
-pg:array[0..4095]of char;
+pg:array[0..8191]of char;
 pe:integer;
 ep,err,ev:integer;
 vars:array[0..25]of integer;
 pid:array[0..9]of integer;
 gs:array[0..63]of integer;
+um:array[0..1023]of integer;
 fv:array[0..15]of integer;
 fl:array[0..15]of integer;
 fs:array[0..15]of integer;
@@ -113,7 +114,8 @@ else if(tb[ep]>=VA)and(tb[ep]<=VA+25)then begin v:=vars[tb[ep]-VA];ep:=ep+1 end
 else if tb[ep]=176 then begin ep:=ep+1;p_expr(4);v:=ev;
 if(err=0)and(tb[ep]=177)then ep:=ep+1 else if err=0 then err:=1 end
 else if tb[ep]=FK+21 then begin ep:=ep+1;
-if tb[ep]=176 then begin ep:=ep+1;p_expr(4);v:=peek(ev);
+if tb[ep]=176 then begin ep:=ep+1;p_expr(4);
+if(ev>=0)and(ev<1024)then v:=um[ev] else v:=peek(ev);
 if(err=0)and(tb[ep]=177)then ep:=ep+1 else if err=0 then err:=1
 end else err:=1 end
 else if tb[ep]=FK+23 then begin ep:=ep+1;
@@ -279,7 +281,9 @@ else if t=FK+20 then running:=0
 else if t=FK+22 then begin ep:=ep+1;p_expr(4);
 if err=0 then begin n:=ev;
 if tb[ep]=178 then begin ep:=ep+1;p_expr(4);
-if err=0 then poke(n,ev) end else err:=1 end end
+if err=0 then begin
+if(n>=0)and(n<1024)then um[n]:=ev else poke(n,ev)
+end end else err:=1 end end
 else if(t>=VA)and(t<=VA+25)then do_let
 else err:=2 end;
 if err<>0 then begin write('?ERR ');print_int(err);

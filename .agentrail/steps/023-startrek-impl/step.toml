@@ -1,6 +1,6 @@
 number = 23
 slug = "startrek-impl"
-status = "pending"
+status = "in-progress"
 description = "Implement the Star Trek game at examples/startrek.bas per docs/startrek-spec...."
 role = "production"
 context_files = []

@@ -22,4 +22,8 @@ fi
 # file lacks a trailing newline after BYE — otherwise read_line blocks
 # waiting for more UART input and the run appears to hang.
 INPUT="$(cat "$BAS")"$'\n\x04'
-"$PV24T" "$P24" -i "$INPUT" -n 10000000 2>&1 | sed -E 's/^>+//' | grep -v '^$'
+# pv24t: -n 0 means unlimited. Override with BASIC_MAX_INSN if you want a cap
+# (e.g. for tight CI loops). Interactive game demos can spin forever waiting
+# on input, so the default has to be unlimited.
+: "${BASIC_MAX_INSN:=0}"
+"$PV24T" "$P24" -i "$INPUT" -n "$BASIC_MAX_INSN" 2>&1 | sed -E 's/^>+//' | grep -v '^$'
