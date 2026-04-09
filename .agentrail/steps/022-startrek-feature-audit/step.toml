@@ -1,6 +1,6 @@
 number = 22
 slug = "startrek-feature-audit"
-status = "pending"
+status = "in-progress"
 description = "Audit BASIC interpreter features required by docs/startrek-spec.md. Produce d..."
 role = "production"
 context_files = []

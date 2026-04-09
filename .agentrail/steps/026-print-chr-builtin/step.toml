@@ -1,0 +1,7 @@
+number = 26
+slug = "print-chr-builtin"
+status = "pending"
+description = "Add CHR$(n) recognized inside PRINT item lists. When do_print sees tb[ep]=FK+..."
+role = "production"
+context_files = []
+created_at = "2026-04-08T17:26:31"
