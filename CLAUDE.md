@@ -65,6 +65,18 @@ agentrail plan            # View the plan
 agentrail next            # Current step + context
 ```
 
+## Code Formatting
+
+All `.pas` source files MUST be formatted with `scripts/format.sh` before
+every commit. This uses emacs pascal-mode to apply consistent indentation.
+
+```bash
+./scripts/format.sh        # format all src/*.pas files
+```
+
+Run this as part of your pre-commit workflow. Do not commit unformatted
+Pascal source.
+
 ## Build / Test
 
 The BASIC interpreter runs on the COR24 p-code VM. Implementation
