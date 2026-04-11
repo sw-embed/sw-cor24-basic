@@ -1,6 +1,6 @@
 number = 24
 slug = "startrek-validate"
-status = "pending"
+status = "in-progress"
 description = "Validate examples/startrek.bas end-to-end on the emulator. Run a scripted pla..."
 role = "production"
 context_files = []

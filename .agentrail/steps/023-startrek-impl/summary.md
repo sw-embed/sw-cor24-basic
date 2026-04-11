@@ -1,0 +1,1 @@
+Implemented examples/startrek.bas with SRS/LRS/warp/impulse/phasers/torpedoes/shields/status/help, fixed impulse no-op bug, added RED ALERT with bell, A-H row coords, 5x5 LRS with legend, compass help. Interpreter: grew program store to 8KB, added 1KB PEEK/POKE user memory.

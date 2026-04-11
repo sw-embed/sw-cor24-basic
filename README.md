@@ -77,9 +77,23 @@ Known limitations:
 ./scripts/run-basic.sh examples/hello.bas
 ```
 
+## Star Trek demo
+
+`examples/startrek.bas` is a full Star Trek game showcasing GOSUB,
+PEEK/POKE, FOR/NEXT, INPUT, and the PRNG. Commands: SRS, LRS, warp,
+impulse, phasers, photon torpedoes, shields, status, help, and resign.
+Coordinates use rows A-H and columns 1-8.
+
+```sh
+./scripts/demo-startrek.sh        # interactive play (requires pv24t)
+./scripts/run-basic.sh examples/startrek.bas   # batch/scripted
+```
+
+A validation transcript is at `tests/startrek-transcript.txt`.
+
 ## Demos
 
-Six CLI demos under `scripts/demo-*.sh`. See [docs/demos.md](docs/demos.md)
+Seven CLI demos under `scripts/demo-*.sh`. See [docs/demos.md](docs/demos.md)
 for the full gallery.
 
 ```sh
@@ -90,6 +104,7 @@ for the full gallery.
 ./scripts/demo-factorial.sh
 ./scripts/demo-count.sh
 ./scripts/demo-memdump.sh
+./scripts/demo-startrek.sh
 ```
 
 ## Dependencies
