@@ -34,7 +34,8 @@ p-code VM as a language layer:
 - Statements: LET, PRINT, INPUT, IF...THEN, GOTO, GOSUB, RETURN,
   FOR...TO...STEP, NEXT, STOP, END, REM
 - Commands: LIST, RUN, NEW, BYE (or Ctrl-D / Ctrl-] at prompt)
-- Functions: PEEK, POKE, ABS
+- Functions: PEEK, POKE, ABS, CHR$ (PRINT only)
+- Logical operators: AND, OR (below comparison in precedence)
 - Variables: A-Z (26 scalar integers)
 
 ## Positioning
@@ -91,9 +92,21 @@ Coordinates use rows A-H and columns 1-8.
 
 A validation transcript is at `tests/startrek-transcript.txt`.
 
+## Trek Adventure demo
+
+`examples/trek-adventure.bas` is a text adventure translated from an
+early-1980s magazine BASIC listing (see `docs/trek-adventure.txt`).
+You wake alone on a doomed Enterprise, find tools and a tribble, and
+have to patch the engine room before orbit decays. Commands are
+numeric menus (integer-only dialect, no string variables).
+
+```sh
+./scripts/demo-trek-adventure.sh
+```
+
 ## Demos
 
-Seven CLI demos under `scripts/demo-*.sh`. See [docs/demos.md](docs/demos.md)
+CLI demos under `scripts/demo-*.sh`. See [docs/demos.md](docs/demos.md)
 for the full gallery.
 
 ```sh
@@ -105,6 +118,7 @@ for the full gallery.
 ./scripts/demo-count.sh
 ./scripts/demo-memdump.sh
 ./scripts/demo-startrek.sh
+./scripts/demo-trek-adventure.sh
 ```
 
 ## Dependencies

@@ -34,6 +34,7 @@ begin
    ks(13,'E','N','D',' ',' ',' ');ks(14,'R','E','M',' ',' ',' ');
    ks(15,'L','I','S','T',' ',' ');ks(16,'R','U','N',' ',' ',' ');
    ks(17,'N','E','W',' ',' ',' ');
+   ks(18,'A','N','D',' ',' ',' ');ks(19,'O','R',' ',' ',' ',' ');
    ks(20,'B','Y','E',' ',' ',' ');ks(21,'P','E','E','K',' ',' ');
    ks(22,'P','O','K','E',' ',' ');ks(23,'A','B','S',' ',' ',' ');
    ks(24,'C','H','R','$',' ',' ')
@@ -112,15 +113,15 @@ begin
    if lev=0 then begin v:=0;
       if tb[ep]=TI then begin ep:=ep+1;v:=tb[ep]*65536+tb[ep+1]*256+tb[ep+2];ep:=ep+3 end
    else if(tb[ep]>=VA)and(tb[ep]<=VA+25)then begin v:=vars[tb[ep]-VA];ep:=ep+1 end
-   else if tb[ep]=176 then begin ep:=ep+1;p_expr(4);v:=ev;
+   else if tb[ep]=176 then begin ep:=ep+1;p_expr(5);v:=ev;
       if(err=0)and(tb[ep]=177)then ep:=ep+1 else if err=0 then err:=1 end
    else if tb[ep]=FK+21 then begin ep:=ep+1;
-      if tb[ep]=176 then begin ep:=ep+1;p_expr(4);
+      if tb[ep]=176 then begin ep:=ep+1;p_expr(5);
 	 if(ev>=0)and(ev<1024)then v:=um[ev] else v:=peek(ev);
 	 if(err=0)and(tb[ep]=177)then ep:=ep+1 else if err=0 then err:=1
       end else err:=1 end
    else if tb[ep]=FK+23 then begin ep:=ep+1;
-      if tb[ep]=176 then begin ep:=ep+1;p_expr(4);v:=ev;
+      if tb[ep]=176 then begin ep:=ep+1;p_expr(5);v:=ev;
 	 if v<0 then v:=0-v;
 	 if(err=0)and(tb[ep]=177)then ep:=ep+1 else if err=0 then err:=1
       end else err:=1 end
@@ -137,13 +138,18 @@ else if lev=3 then begin p_expr(2);v:=ev;
    while(err=0)and((tb[ep]=TP)or(tb[ep]=TP+1))do begin
       op:=tb[ep];ep:=ep+1;p_expr(2);r:=ev;
       if op=TP then v:=v+r else v:=v-r end;ev:=v end
-else begin p_expr(3);v:=ev;
+else if lev=4 then begin p_expr(3);v:=ev;
    while(err=0)and(tb[ep]>=TP+4)and(tb[ep]<=TG)do begin
       op:=tb[ep];ep:=ep+1;p_expr(3);r:=ev;b:=false;
       if op=TP+4 then b:=(v=r) else if op=TP+5 then b:=(v<>r)
       else if op=TP+6 then b:=(v<r) else if op=TP+7 then b:=(v<=r)
       else if op=TP+8 then b:=(v>r) else if op=TG then b:=(v>=r);
       if b then v:=1 else v:=0 end;ev:=v end
+else begin p_expr(4);v:=ev;
+   while(err=0)and((tb[ep]=FK+18)or(tb[ep]=FK+19))do begin
+      op:=tb[ep];ep:=ep+1;p_expr(4);r:=ev;
+      if op=FK+18 then begin if(v<>0)and(r<>0)then v:=1 else v:=0 end
+      else begin if(v<>0)or(r<>0)then v:=1 else v:=0 end end;ev:=v end
 end;
 procedure pc(c:char);
 begin writechar(c);col:=col+1 end;
@@ -184,11 +190,11 @@ begin dn:=0;nl:=1;
       if tb[ep]=TS then begin ep:=ep+1;n:=tb[ep];ep:=ep+1;i:=0;
 	 while i<n do begin pc(chr(tb[ep]));ep:=ep+1;i:=i+1 end end
    else if tb[ep]=FK+24 then begin ep:=ep+1;
-      if tb[ep]=176 then begin ep:=ep+1;p_expr(4);
+      if tb[ep]=176 then begin ep:=ep+1;p_expr(5);
 	 if(err=0)and(tb[ep]=177)then begin ep:=ep+1;pc(chr(ev)) end
 	 else if err=0 then err:=1
       end else err:=1 end
-   else begin p_expr(4);if err=0 then print_int(ev) end;
+   else begin p_expr(5);if err=0 then print_int(ev) end;
       if err<>0 then dn:=1
       else if tb[ep]=179 then begin ep:=ep+1;
 	 if tb[ep]=0 then begin nl:=0;dn:=1 end end
@@ -199,7 +205,7 @@ begin dn:=0;nl:=1;
 procedure do_let;
 var vi:integer;
 begin if(tb[ep]>=VA)and(tb[ep]<=VA+25)then begin vi:=tb[ep]-VA;ep:=ep+1;
-   if tb[ep]=TP+4 then begin ep:=ep+1;p_expr(4);vars[vi]:=ev end else err:=1
+   if tb[ep]=TP+4 then begin ep:=ep+1;p_expr(5);vars[vi]:=ev end else err:=1
 end else err:=1 end;
 procedure do_list;
 var p,n,ln,j,tk,k,kn,i,lc:integer;rem:boolean;
@@ -257,22 +263,22 @@ begin ep:=0;err:=0;rd:=1;
 	 read_line;pi;
 	 while pok=0 do begin pc('?');pc('R');pc('E');pc('D');pc('O');pc(' ');read_line;pi end;
 	 vars[vi]:=ev end else err:=1 end
-   else if t=FK+3 then begin ep:=ep+1;p_expr(4);
+   else if t=FK+3 then begin ep:=ep+1;p_expr(5);
       if(err=0)and(tb[ep]=FK+4)then begin ep:=ep+1;if ev<>0 then rd:=1 end
    else if err=0 then err:=1 end
-   else if t=FK+5 then begin ep:=ep+1;p_expr(4);
+   else if t=FK+5 then begin ep:=ep+1;p_expr(5);
       if err=0 then begin lp:=store_find(ev);if lp<0 then err:=3 else tl:=lp end end
-   else if t=FK+6 then begin ep:=ep+1;p_expr(4);
+   else if t=FK+6 then begin ep:=ep+1;p_expr(5);
       if(err=0)and(gp>=64)then err:=6 else if err=0 then begin gs[gp]:=tl;gp:=gp+1;
 	 lp:=store_find(ev);if lp<0 then err:=3 else tl:=lp end end
    else if t=FK+7 then if gp=0 then err:=7 else begin gp:=gp-1;tl:=gs[gp] end
    else if t=FK+8 then begin ep:=ep+1;
       if(tb[ep]>=VA)and(tb[ep]<=VA+25)then begin vi:=tb[ep]-VA;ep:=ep+1;
-	 if tb[ep]=TP+4 then begin ep:=ep+1;p_expr(4);vars[vi]:=ev;
-	    if(err=0)and(tb[ep]=FK+9)then begin ep:=ep+1;p_expr(4);
+	 if tb[ep]=TP+4 then begin ep:=ep+1;p_expr(5);vars[vi]:=ev;
+	    if(err=0)and(tb[ep]=FK+9)then begin ep:=ep+1;p_expr(5);
 	       if err=0 then begin if fp>=16 then err:=8 else begin
 		  fl[fp]:=ev;
-		  if tb[ep]=FK+10 then begin ep:=ep+1;p_expr(4);fs[fp]:=ev end else fs[fp]:=1;
+		  if tb[ep]=FK+10 then begin ep:=ep+1;p_expr(5);fs[fp]:=ev end else fs[fp]:=1;
 		  fv[fp]:=vi;fr[fp]:=tl;fp:=fp+1 end end end
 	 else if err=0 then err:=1 end else err:=1 end else err:=1 end
    else if t=FK+11 then if fp=0 then err:=9 else begin
@@ -285,9 +291,9 @@ begin ep:=0;err:=0;rd:=1;
    else if t=FK+15 then do_list
    else if t=FK+17 then pe:=0
    else if t=FK+20 then running:=0
-   else if t=FK+22 then begin ep:=ep+1;p_expr(4);
+   else if t=FK+22 then begin ep:=ep+1;p_expr(5);
       if err=0 then begin n:=ev;
-	 if tb[ep]=178 then begin ep:=ep+1;p_expr(4);
+	 if tb[ep]=178 then begin ep:=ep+1;p_expr(5);
 	    if err=0 then begin
 	       if(n>=0)and(n<1024)then um[n]:=ev else poke(n,ev)
 	    end end else err:=1 end end

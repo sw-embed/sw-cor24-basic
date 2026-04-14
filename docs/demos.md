@@ -16,6 +16,8 @@ needed) and runs the corresponding `examples/<name>.bas` through
 ./scripts/demo-factorial.sh
 ./scripts/demo-count.sh
 ./scripts/demo-memdump.sh
+./scripts/demo-startrek.sh
+./scripts/demo-trek-adventure.sh
 ```
 
 Each script feeds the `.bas` file to the interpreter as if it were
@@ -33,6 +35,8 @@ so they run end-to-end and exit cleanly.
 | `demo-factorial.sh` | `examples/factorial.bas` | Iterative product accumulator inside `FOR`/`NEXT`. Mixed-type `PRINT` of `N;"!=";F`. |
 | `demo-count.sh` | `examples/count.bas` | Minimal `FOR`/`NEXT` smoke test, counts 1..10. |
 | `demo-memdump.sh` | `examples/memdump.bas` | `POKE` then `PEEK` round-trip on a low scratch address. Demonstrates the byte-MMIO syntax. |
+| `demo-startrek.sh` | `examples/startrek.bas` | Full Star Trek battle game — 8×8 galaxy, phasers, torpedoes, shields, warp/impulse movement. Biggest program in the suite. |
+| `demo-trek-adventure.sh` | `examples/trek-adventure.bas` | Text adventure translated from a 1980s magazine BASIC listing. Wake alone on a doomed Enterprise, find tools, patch the engine before orbit decays. Numeric menu parser (no string variables in v1). |
 | *(no wrapper)* | `examples/blink.bas` | LED blink loop targeting the COR24 LED MMIO at `0xFF0000`. **Hardware/cor24-emu only** — `pv24t` traps because the address is outside its VM memory. |
 
 ## Demo Notes

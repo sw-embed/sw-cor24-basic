@@ -1,0 +1,577 @@
+
+
+
+
+There was a game, in BASIC, at the back of a magazine, sometime around early 1980s, that was a Star Trek text adventure.  You awake on the bridge of the enterprise alone.  The computer says something about a decaying orbit, engines are down.  You have access to the turbolift to get to some parts of the ship.  You need to find an ID badge/card-key to access locked room(s), you need to find tools, and eventually fix the engine to stop the decaying orbit.  There are also Klingons taking over at some point.  You can thwart the Klingons by throwing a trible at them.  Can you produce a BASIC program to do something like this?
+
+Thought for a few seconds
+You want a retro, magazine-style BASIC text adventure in the spirit of early 1980s Star Trek games:
+
+single-player
+
+you wake alone on the Enterprise bridge
+
+orbit is decaying
+
+engines are down
+
+you move room-to-room
+
+some rooms are locked
+
+you must find an ID card and tools
+
+Klingons appear later
+
+a tribble can neutralize them
+
+end goal: repair the engines before time runs out
+
+A good fit is a small state-machine adventure written in classic line-numbered BASIC, with:
+
+High-level design
+World model
+A handful of rooms connected by exits:
+
+Bridge
+
+Turbolift
+
+Corridor
+
+Quarters
+
+Storage
+
+Engineering
+
+Armory
+
+Shuttle Bay
+
+Computer Core
+
+Inventory
+A few key items:
+
+ID card
+
+toolkit
+
+tribble
+
+phaser
+
+engine coupler
+
+Game state
+A few flags and counters:
+
+current room
+
+inventory flags
+
+whether Klingons have boarded
+
+whether engineering is repaired
+
+orbit decay timer
+
+whether the player is alive or won
+
+Interaction model
+Simple two-word commands:
+
+GO NORTH
+
+GO SOUTH
+
+TAKE CARD
+
+USE TOOLKIT
+
+LOOK
+
+INVENTORY
+
+THROW TRIBBLE
+
+FIRE PHASER
+
+HELP
+
+That keeps the parser feasible in old BASIC.
+
+Nonfunctional goals
+The program below aims for:
+
+very small conceptual footprint
+
+easy to type into an old BASIC
+
+easy to extend
+
+recognizable old-school feel
+
+QBasic/GW-BASIC style compatibility
+
+Tradeoffs
+Benefits
+compact
+
+readable
+
+easy to modify
+
+has the requested story beats
+
+Limits
+parser is intentionally simple
+
+room descriptions are hand-coded
+
+not a full Infocom-style engine
+
+some behavior is scripted for flavor
+
+BASIC program
+This is written in a QBasic / GW-BASIC friendly style using line numbers and simple string handling.
+
+10 REM ==========================================
+20 REM STAR TREK: DECAYING ORBIT
+30 REM RETRO BASIC TEXT ADVENTURE
+40 REM ==========================================
+50 CLS
+60 RANDOMIZE TIMER
+70 GOSUB 1000
+80 GOTO 200
+
+100 REM ---------- VARIABLES ----------
+110 REM R = ROOM
+120 REM T = TURNS LEFT
+130 REM K = KLINGONS ACTIVE
+140 REM W = WON
+150 REM D = DEAD
+160 REM INVENTORY FLAGS:
+170 REM C=ID CARD, TK=TOOLKIT, TR=TRIBBLE
+180 REM P=PHASER, EC=ENGINE COUPLER
+190 RETURN
+
+200 REM ---------- GAME LOOP ----------
+210 IF W = 1 THEN GOTO 9000
+220 IF D = 1 THEN GOTO 9100
+230 IF T <= 0 THEN GOTO 9200
+240 GOSUB 2000
+250 PRINT
+260 INPUT "COMMAND"; A$
+270 GOSUB 3000
+280 T = T - 1
+290 GOSUB 7000
+300 GOTO 200
+
+1000 REM ---------- INIT ----------
+1010 GOSUB 100
+1020 R = 1
+1030 T = 30
+1040 K = 0
+1050 W = 0
+1060 D = 0
+1070 C = 0
+1080 TK = 0
+1090 TR = 0
+1100 P = 0
+1110 EC = 0
+1120 E1 = 0
+1130 PRINT "STAR TREK: DECAYING ORBIT"
+1140 PRINT
+1150 PRINT "You awaken alone on the bridge of the U.S.S. Enterprise."
+1160 PRINT "Red lights flash. The ship shudders."
+1170 PRINT
+1180 PRINT "COMPUTER: WARNING. STABLE ORBIT LOST."
+1190 PRINT "COMPUTER: ENGINES OFFLINE."
+1200 PRINT "COMPUTER: ORBITAL DECAY IN PROGRESS."
+1210 PRINT
+1220 PRINT "You must restore engine power before the ship burns up."
+1230 PRINT
+1240 PRINT "Type HELP for commands."
+1250 PRINT
+1260 RETURN
+
+2000 REM ---------- ROOM DESCRIPTION ----------
+2010 PRINT "----------------------------------------"
+2020 PRINT "TURNS LEFT:"; T
+2030 PRINT
+2040 IF R = 1 THEN GOSUB 2100
+2050 IF R = 2 THEN GOSUB 2200
+2060 IF R = 3 THEN GOSUB 2300
+2070 IF R = 4 THEN GOSUB 2400
+2080 IF R = 5 THEN GOSUB 2500
+2090 IF R = 6 THEN GOSUB 2600
+2095 IF R = 7 THEN GOSUB 2700
+2096 IF R = 8 THEN GOSUB 2800
+2097 IF R = 9 THEN GOSUB 2900
+2098 RETURN
+
+2100 PRINT "BRIDGE"
+2110 PRINT "You are on the deserted bridge."
+2120 PRINT "The main viewscreen shows a planet growing larger."
+2130 PRINT "A damaged console sparks fitfully."
+2140 PRINT "The turbolift doors stand open."
+2150 IF P = 0 THEN PRINT "There is a PHASER under the captain's chair."
+2160 PRINT "Exits: TURBOLIFT"
+2170 RETURN
+
+2200 PRINT "TURBOLIFT"
+2210 PRINT "The turbolift hums weakly on emergency power."
+2220 PRINT "Buttons for DECK AFT, DECK MID, and DECK LOW glow dimly."
+2230 PRINT "Exits: BRIDGE, CORRIDOR, ENGINEERING"
+2240 RETURN
+
+2300 PRINT "CORRIDOR"
+2310 PRINT "A long corridor stretches fore and aft."
+2320 PRINT "Emergency lights pulse along the walls."
+2330 PRINT "Doors lead to QUARTERS, STORAGE, ARMORY, and COMPUTER."
+2340 PRINT "Exits: TURBOLIFT, QUARTERS, STORAGE, ARMORY, COMPUTER"
+2350 RETURN
+
+2400 PRINT "QUARTERS"
+2410 PRINT "Crew quarters are in disarray."
+2420 PRINT "A locker hangs open. Personal effects float in low gravity."
+2430 IF C = 0 THEN PRINT "A SECURITY ID CARD glints under a bunk."
+2440 PRINT "Exits: CORRIDOR"
+2450 RETURN
+
+2500 PRINT "STORAGE"
+2510 PRINT "Cargo containers are strapped to the deck."
+2520 IF TK = 0 THEN PRINT "A TOOLKIT lies beside a maintenance crate."
+2530 IF EC = 0 THEN PRINT "An ENGINE COUPLER rests on a shelf."
+2540 IF TR = 0 THEN PRINT "Something furry squeaks from a bin: a TRIBBLE."
+2550 PRINT "Exits: CORRIDOR, SHUTTLE"
+2560 RETURN
+
+2600 PRINT "ENGINEERING"
+2610 PRINT "Engineering is hot and noisy."
+2620 PRINT "The warp systems are offline."
+2630 IF E1 = 0 THEN PRINT "A plasma relay panel hangs open."
+2640 IF E1 = 1 THEN PRINT "The relay panel is patched, but final activation remains."
+2650 PRINT "Exits: TURBOLIFT"
+2660 RETURN
+
+2700 PRINT "ARMORY"
+2710 IF C = 0 THEN PRINT "The armory door is locked by security clearance."
+2720 IF C = 1 THEN PRINT "ARMORY"
+2730 IF C = 1 THEN PRINT "Racks line the walls. Most weapons are missing."
+2740 IF C = 1 AND P = 0 THEN PRINT "A spare POWER CELL is here, but your phaser already works."
+2750 IF C = 1 THEN PRINT "Exits: CORRIDOR"
+2760 RETURN
+
+2800 PRINT "SHUTTLE BAY"
+2810 PRINT "The shuttle bay is dark and cold."
+2820 PRINT "A shuttle hangs in place, but launch systems are dead."
+2830 PRINT "You hear distant metallic footsteps."
+2840 PRINT "Exits: STORAGE"
+2850 RETURN
+
+2900 PRINT "COMPUTER CORE"
+2910 PRINT "Banks of computer panels flicker in standby mode."
+2920 PRINT "A monitor scrolls internal security alerts."
+2930 PRINT "Exits: CORRIDOR"
+2940 RETURN
+
+3000 REM ---------- PARSER ----------
+3010 B$ = ""
+3020 C$ = ""
+3030 GOSUB 3500
+3040 IF B$ = "HELP" THEN GOSUB 6000: RETURN
+3050 IF B$ = "LOOK" THEN RETURN
+3060 IF B$ = "INVENTORY" THEN GOSUB 6100: RETURN
+3070 IF B$ = "INV" THEN GOSUB 6100: RETURN
+3080 IF B$ = "GO" THEN GOSUB 4000: RETURN
+3090 IF B$ = "TAKE" THEN GOSUB 5000: RETURN
+3100 IF B$ = "GET" THEN GOSUB 5000: RETURN
+3110 IF B$ = "USE" THEN GOSUB 5200: RETURN
+3120 IF B$ = "THROW" THEN GOSUB 5400: RETURN
+3130 IF B$ = "FIRE" THEN GOSUB 5500: RETURN
+3140 IF B$ = "ENTER" THEN B$ = "GO": GOSUB 4000: RETURN
+3150 PRINT "I DON'T UNDERSTAND THAT."
+3160 RETURN
+
+3500 REM ---------- SPLIT COMMAND ----------
+3510 A$ = UCASE$(A$)
+3520 X = INSTR(A$, " ")
+3530 IF X = 0 THEN B$ = A$: C$ = "": RETURN
+3540 B$ = LEFT$(A$, X - 1)
+3550 C$ = MID$(A$, X + 1)
+3560 RETURN
+
+4000 REM ---------- MOVEMENT ----------
+4010 IF C$ = "TURBOLIFT" AND R = 1 THEN R = 2: RETURN
+4020 IF C$ = "BRIDGE" AND R = 2 THEN R = 1: RETURN
+4030 IF C$ = "CORRIDOR" AND R = 2 THEN R = 3: RETURN
+4040 IF C$ = "TURBOLIFT" AND R = 3 THEN R = 2: RETURN
+4050 IF C$ = "QUARTERS" AND R = 3 THEN R = 4: RETURN
+4060 IF C$ = "CORRIDOR" AND R = 4 THEN R = 3: RETURN
+4070 IF C$ = "STORAGE" AND R = 3 THEN R = 5: RETURN
+4080 IF C$ = "CORRIDOR" AND R = 5 THEN R = 3: RETURN
+4090 IF C$ = "ENGINEERING" AND R = 2 THEN R = 6: RETURN
+4100 IF C$ = "TURBOLIFT" AND R = 6 THEN R = 2: RETURN
+4110 IF C$ = "ARMORY" AND R = 3 THEN GOSUB 4300: RETURN
+4120 IF C$ = "COMPUTER" AND R = 3 THEN R = 9: RETURN
+4130 IF C$ = "CORRIDOR" AND R = 9 THEN R = 3: RETURN
+4140 IF C$ = "SHUTTLE" AND R = 5 THEN R = 8: RETURN
+4150 IF C$ = "STORAGE" AND R = 8 THEN R = 5: RETURN
+4160 PRINT "YOU CAN'T GO THAT WAY."
+4170 RETURN
+
+4300 REM ---------- ARMORY ACCESS ----------
+4310 IF C = 0 THEN PRINT "THE ARMORY DOOR IS LOCKED. YOU NEED AN ID CARD.": RETURN
+4320 R = 7
+4330 RETURN
+
+5000 REM ---------- TAKE ----------
+5010 IF C$ = "PHASER" AND R = 1 AND P = 0 THEN P = 1: PRINT "TAKEN.": RETURN
+5020 IF C$ = "CARD" AND R = 4 AND C = 0 THEN C = 1: PRINT "TAKEN.": RETURN
+5030 IF C$ = "ID" AND R = 4 AND C = 0 THEN C = 1: PRINT "TAKEN.": RETURN
+5040 IF C$ = "ID CARD" AND R = 4 AND C = 0 THEN C = 1: PRINT "TAKEN.": RETURN
+5050 IF C$ = "TOOLKIT" AND R = 5 AND TK = 0 THEN TK = 1: PRINT "TAKEN.": RETURN
+5060 IF C$ = "COUPLER" AND R = 5 AND EC = 0 THEN EC = 1: PRINT "TAKEN.": RETURN
+5070 IF C$ = "ENGINE COUPLER" AND R = 5 AND EC = 0 THEN EC = 1: PRINT "TAKEN.": RETURN
+5080 IF C$ = "TRIBBLE" AND R = 5 AND TR = 0 THEN TR = 1: PRINT "THE TRIBBLE PURRS SOFTLY.": RETURN
+5090 PRINT "YOU DON'T SEE THAT HERE."
+5100 RETURN
+
+5200 REM ---------- USE ----------
+5210 IF C$ = "CARD" AND R = 3 THEN PRINT "TRY GO ARMORY.": RETURN
+5220 IF C$ = "TOOLKIT" AND R = 6 THEN GOSUB 5600: RETURN
+5230 IF C$ = "COUPLER" AND R = 6 THEN GOSUB 5700: RETURN
+5240 IF C$ = "ENGINE COUPLER" AND R = 6 THEN GOSUB 5700: RETURN
+5250 IF C$ = "COMPUTER" AND R = 9 THEN GOSUB 5800: RETURN
+5260 PRINT "NOTHING HAPPENS."
+5270 RETURN
+
+5400 REM ---------- THROW ----------
+5410 IF C$ = "TRIBBLE" AND K = 1 THEN GOSUB 5900: RETURN
+5420 IF C$ = "TRIBBLE" AND TR = 0 THEN PRINT "YOU DON'T HAVE A TRIBBLE.": RETURN
+5430 PRINT "THROW WHAT?"
+5440 RETURN
+
+5500 REM ---------- FIRE ----------
+5510 IF P = 0 THEN PRINT "YOU DON'T HAVE A PHASER.": RETURN
+5520 IF K = 0 THEN PRINT "YOU FIRE AT NOTHING IN PARTICULAR.": RETURN
+5530 PRINT "YOU STUN ONE KLINGON, BUT ANOTHER RETURNS FIRE!"
+5540 D = 1
+5550 RETURN
+
+5600 REM ---------- USE TOOLKIT IN ENGINEERING ----------
+5610 IF TK = 0 THEN PRINT "YOU DON'T HAVE A TOOLKIT.": RETURN
+5620 IF EC = 0 THEN PRINT "YOU TIGHTEN FITTINGS, BUT A COUPLER IS STILL MISSING.": RETURN
+5630 IF E1 = 0 THEN PRINT "YOU REMOVE THE BURNT RELAY COVER AND PREP THE MOUNT."
+5640 IF E1 = 0 THEN E1 = 1: RETURN
+5650 PRINT "YOU'VE ALREADY PREPPED THE RELAY PANEL."
+5660 RETURN
+
+5700 REM ---------- USE COUPLER IN ENGINEERING ----------
+5710 IF EC = 0 THEN PRINT "YOU DON'T HAVE THE ENGINE COUPLER.": RETURN
+5720 IF TK = 0 THEN PRINT "YOU NEED TOOLS TO INSTALL IT.": RETURN
+5730 IF E1 = 0 THEN PRINT "YOU NEED TO OPEN AND PREP THE RELAY PANEL FIRST.": RETURN
+5740 PRINT "YOU INSTALL THE ENGINE COUPLER AND LOCK IT DOWN."
+5750 PRINT "MAIN IMPULSE POWER SURGES BACK ONLINE."
+5760 PRINT "COMPUTER: ORBIT STABILIZED."
+5770 W = 1
+5780 RETURN
+
+5800 REM ---------- USE COMPUTER ----------
+5810 PRINT "COMPUTER: SECURITY LOG..."
+5820 PRINT "'INTRUDER ALERT. BOARDING ACTION DETECTED.'"
+5830 PRINT "'SURVIVING CREW EVACUATED OR CAPTURED.'"
+5840 PRINT "'KLINGON SEARCH PARTIES EXPECTED.'"
+5850 PRINT "A map highlight marks STORAGE and ENGINEERING systems."
+5860 RETURN
+
+5900 REM ---------- THROW TRIBBLE AT KLINGONS ----------
+5910 IF TR = 0 THEN PRINT "YOU DON'T HAVE A TRIBBLE.": RETURN
+5920 PRINT "You hurl the tribble."
+5930 PRINT "The Klingons freeze."
+5940 PRINT "One shouts, 'Get it away from me!'"
+5950 PRINT "In the confusion, they retreat down the corridor."
+5960 K = 0
+5970 TR = 0
+5980 RETURN
+
+6000 REM ---------- HELP ----------
+6010 PRINT "COMMANDS:"
+6020 PRINT "  LOOK"
+6030 PRINT "  INVENTORY"
+6040 PRINT "  GO BRIDGE"
+6050 PRINT "  GO TURBOLIFT"
+6060 PRINT "  GO CORRIDOR"
+6070 PRINT "  GO QUARTERS"
+6080 PRINT "  GO STORAGE"
+6090 PRINT "  GO ENGINEERING"
+6091 PRINT "  GO ARMORY"
+6092 PRINT "  GO COMPUTER"
+6093 PRINT "  GO SHUTTLE"
+6094 PRINT "  TAKE PHASER"
+6095 PRINT "  TAKE CARD"
+6096 PRINT "  TAKE TOOLKIT"
+6097 PRINT "  TAKE COUPLER"
+6098 PRINT "  TAKE TRIBBLE"
+6099 PRINT "  USE TOOLKIT"
+6100 PRINT "  USE COUPLER"
+6101 PRINT "  USE COMPUTER"
+6102 PRINT "  THROW TRIBBLE"
+6103 PRINT "  FIRE PHASER"
+6104 RETURN
+
+6100 REM ---------- INVENTORY ----------
+6110 PRINT "YOU ARE CARRYING:"
+6120 Z = 0
+6130 IF C = 1 THEN PRINT "  ID CARD": Z = 1
+6140 IF TK = 1 THEN PRINT "  TOOLKIT": Z = 1
+6150 IF EC = 1 THEN PRINT "  ENGINE COUPLER": Z = 1
+6160 IF TR = 1 THEN PRINT "  TRIBBLE": Z = 1
+6170 IF P = 1 THEN PRINT "  PHASER": Z = 1
+6180 IF Z = 0 THEN PRINT "  NOTHING"
+6190 RETURN
+
+7000 REM ---------- EVENTS ----------
+7010 IF T = 22 AND K = 0 THEN PRINT "COMPUTER: INTERNAL SENSORS DETECT BOARDERS."
+7020 IF T = 21 THEN K = 1
+7030 IF K = 1 THEN GOSUB 7100
+7040 RETURN
+
+7100 REM ---------- KLINGON ENCOUNTERS ----------
+7110 IF R = 8 THEN PRINT "Two Klingons emerge from the shadows!"
+7120 IF R = 8 THEN PRINT "One raises a disruptor."
+7130 IF R = 8 THEN PRINT "You have only moments to act."
+7140 IF R = 8 THEN RETURN
+7150 IF R = 3 AND T < 15 THEN PRINT "You hear Klingon voices nearby."
+7160 RETURN
+
+9000 REM ---------- WIN ----------
+9010 PRINT
+9020 PRINT "The deck steadies beneath your feet."
+9030 PRINT "On the viewscreen, the planet slowly recedes."
+9040 PRINT "COMPUTER: ORBIT STABLE."
+9050 PRINT "COMPUTER: EMERGENCY CONDITION ENDED."
+9060 PRINT
+9070 PRINT "You saved the Enterprise."
+9080 END
+
+9100 REM ---------- DEAD ----------
+9110 PRINT
+9120 PRINT "A burst of disruptor fire slams into the bulkhead beside you."
+9130 PRINT "The next shot is more accurate."
+9140 PRINT
+9150 PRINT "You have died."
+9160 END
+
+9200 REM ---------- TIME OUT ----------
+9210 PRINT
+9220 PRINT "The ship shakes violently."
+9230 PRINT "Flames erupt from dead consoles."
+9240 PRINT "The Enterprise enters the upper atmosphere."
+9250 PRINT
+9260 PRINT "You were too late."
+9270 END
+How it plays
+A successful path is roughly:
+
+TAKE PHASER on the bridge
+
+GO TURBOLIFT
+
+GO CORRIDOR
+
+GO QUARTERS
+
+TAKE CARD
+
+back to corridor
+
+GO STORAGE
+
+TAKE TOOLKIT
+
+TAKE COUPLER
+
+TAKE TRIBBLE
+
+eventually Klingons appear
+
+if cornered in the shuttle bay area, THROW TRIBBLE
+
+go to engineering
+
+USE TOOLKIT
+
+USE COUPLER
+
+How to extend it
+Easy additions
+You could add:
+
+more rooms like sickbay, transporter room, captain’s quarters
+
+more puzzles such as restoring turbolift power first
+
+limited phaser charge
+
+multiple Klingon patrols
+
+a score
+
+save/load
+
+randomized item placement
+
+parser synonyms like NORTH, SOUTH, EXAMINE, OPEN
+
+Better old-magazine flavor
+To make it feel even more authentic:
+
+shorten descriptions
+
+add occasional all-caps alerts
+
+use DATA statements for room tables
+
+replace typed room names with one-letter directions
+
+add beeps and pauses if your BASIC supports them
+
+More “Star Trek adventure” flavor
+You mentioned the badge/card-key, tools, engine repair, and tribble puzzle. Some nice next additions would be:
+
+a jefferies tube shortcut
+
+a damaged communicator
+
+a captain’s log clue
+
+a transporter puzzle
+
+a self-destruct bluff against Klingons
+
+Risks / compatibility notes
+UCASE$ exists in QBasic and many later BASICs, but some very old BASICs do not have it.
+
+If your BASIC lacks UCASE$, I can rewrite the parser to avoid it.
+
+Some dialects dislike long variable names like TK or EC; most later Microsoft BASICs are fine, but I can also convert this to stricter TRS-80 / Applesoft / vintage magazine style.
+
+Best next versions
+I can turn this into one of three stronger variants:
+
+A stricter 1980–1983 magazine BASIC version with more primitive parser and shorter code.
+
+A larger adventure with 20+ rooms and more puzzles.
+
+A data-driven BASIC engine so you can author additional episodes more easily.
+
+If you’d like, I’ll produce the more authentic magazine-style version next, optimized for line-by-line typing from a printed page.
+
+
+
+
+
