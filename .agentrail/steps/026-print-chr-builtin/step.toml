@@ -1,6 +1,6 @@
 number = 26
 slug = "print-chr-builtin"
-status = "pending"
+status = "in-progress"
 description = "Add CHR$(n) recognized inside PRINT item lists. When do_print sees tb[ep]=FK+..."
 role = "production"
 context_files = []

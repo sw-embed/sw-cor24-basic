@@ -300,12 +300,13 @@ Whenever `Enterprise` enters a quadrant where `N > 0` (one or more
 Klingons), the game prints:
 
 ```
-\007*** RED ALERT *** KLINGONS DETECTED ***\007
+\007*** RED ALERT *** RED ALERT *** RED ALERT ***
 ```
 
-`\007` = ASCII BEL (`CHR$(7)`). The bells are emitted via `PRINT
-CHR$(7);`, repeated 2–3 times for emphasis. The alert is also printed
-on game start if the starting quadrant happens to contain Klingons.
+`\007` = ASCII BEL (`CHR$(7)`). Each alert line is emitted via
+`PRINT CHR$(7);"*** RED ALERT *** RED ALERT *** RED ALERT ***"`.
+The alert is also printed on game start if the starting quadrant
+happens to contain Klingons.
 
 ## 8. Random Galaxy Generation
 
@@ -387,14 +388,13 @@ mnemonic via `PEEK`-on-input-buffer trickery, or simply present a
 numeric menu like `1=SRS 2=LRS 3=WAR ...`). The numeric-menu
 fallback is acceptable for v1 if mnemonic parsing proves too costly.
 
-### 10.3 No CHR$ in v1
+### 10.3 CHR$ for control characters
 
-To emit BEL and other control characters the game uses `POKE` to a
-known UART output address — or, simpler, prints a literal containing
-the bell character. The reference implementation may add a thin
-`PRINT CHR$(n)` only if the interpreter grows a `CHR$` builtin; until
-then, the alert message can be approximated with `PRINT "*** RED ALERT ***"`
-plus a `POKE` to the UART data register.
+The interpreter provides `CHR$(n)` inside `PRINT` item lists, so BEL
+and other control characters are emitted directly via
+`PRINT CHR$(7);` (see §7). No `POKE`-to-UART workaround is needed.
+`CHR$` is only valid as a `PRINT` item; it cannot appear in
+expressions or `LET`.
 
 ### 10.4 No floating-point
 

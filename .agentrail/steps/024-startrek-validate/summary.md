@@ -1,0 +1,1 @@
+Validated startrek.bas end-to-end on pv24t. Found and fixed 3 bugs: (1) impulse/torpedo Y-clobber from GOSUB ordering, (2) RED ALERT skipped due to fall-through into 1150 sub, (3) STARDATE spacing. Also grew program store 8K→16K (was silently truncating PRNG sub). Captured golden transcript to tests/startrek-transcript.txt. Updated README with demo section.

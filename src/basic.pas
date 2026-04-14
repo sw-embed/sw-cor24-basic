@@ -1,8 +1,8 @@
 program Basic;
 const
-   FK=128;TP=160;TG=169;VA=192;TI=224;TS=225;KW=6;NK=24;PS=16384;
+   FK=128;TP=160;TG=169;VA=192;TI=224;TS=225;KW=6;NK=25;PS=16384;
 var
-   kt:array[0..143]of char;
+   kt:array[0..149]of char;
    lb:array[0..79]of char;
    ll,lp:integer;
    tb:array[0..127]of integer;
@@ -35,7 +35,8 @@ begin
    ks(15,'L','I','S','T',' ',' ');ks(16,'R','U','N',' ',' ',' ');
    ks(17,'N','E','W',' ',' ',' ');
    ks(20,'B','Y','E',' ',' ',' ');ks(21,'P','E','E','K',' ',' ');
-   ks(22,'P','O','K','E',' ',' ');ks(23,'A','B','S',' ',' ',' ')
+   ks(22,'P','O','K','E',' ',' ');ks(23,'A','B','S',' ',' ',' ');
+   ks(24,'C','H','R','$',' ',' ')
 end;
 function kl(i:integer):integer;
 var p,n:integer;
@@ -182,6 +183,11 @@ begin dn:=0;nl:=1;
    while(err=0)and(dn=0)do begin
       if tb[ep]=TS then begin ep:=ep+1;n:=tb[ep];ep:=ep+1;i:=0;
 	 while i<n do begin pc(chr(tb[ep]));ep:=ep+1;i:=i+1 end end
+   else if tb[ep]=FK+24 then begin ep:=ep+1;
+      if tb[ep]=176 then begin ep:=ep+1;p_expr(4);
+	 if(err=0)and(tb[ep]=177)then begin ep:=ep+1;pc(chr(ev)) end
+	 else if err=0 then err:=1
+      end else err:=1 end
    else begin p_expr(4);if err=0 then print_int(ev) end;
       if err<>0 then dn:=1
       else if tb[ep]=179 then begin ep:=ep+1;

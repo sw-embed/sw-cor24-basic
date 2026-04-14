@@ -1,0 +1,1 @@
+ABS bug already fixed in commit b8eec3c and issue #1 already closed. Verified ABS(-42)=42, ABS(42)=42, ABS(0)=0, ABS(A-B)=20 all pass on pv24t. No changes needed.
