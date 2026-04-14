@@ -33,7 +33,7 @@ p-code VM as a language layer:
 - Terminal/teletype oriented
 - Statements: LET, PRINT, INPUT, IF...THEN, GOTO, GOSUB, RETURN,
   FOR...TO...STEP, NEXT, STOP, END, REM
-- Commands: LIST, RUN, NEW, BYE
+- Commands: LIST, RUN, NEW, BYE (or Ctrl-D / Ctrl-] at prompt)
 - Functions: PEEK, POKE, ABS
 - Variables: A-Z (26 scalar integers)
 

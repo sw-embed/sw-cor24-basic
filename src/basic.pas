@@ -161,8 +161,9 @@ begin if n<0 then begin pc('-');n:=0-n end;
 procedure read_line;
 var c:integer;
 begin ll:=0;readln(c);
-   while(c<>10)and(c<>13)and(c<>4)and(ll<80)do
-   begin lb[ll]:=chr(c);ll:=ll+1;readln(c) end end;
+   while(c<>10)and(c<>13)and(c<>4)and(c<>29)and(c>=0)and(ll<80)do
+   begin lb[ll]:=chr(c);ll:=ll+1;readln(c) end;
+   if(c=4)or(c=29)or(c<0)then begin pn;running:=0;ll:=0 end end;
 procedure pi;
 var i,n,s:integer;
 begin
