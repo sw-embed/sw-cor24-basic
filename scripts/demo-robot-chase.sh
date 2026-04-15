@@ -18,4 +18,10 @@ if [ ! -f "$P24" ]; then
   exit 1
 fi
 
-"$PV24T" "$P24" -n 0 -i "$(cat "$BAS")"
+# Pre-seed the PRNG from the shell so each launch gets a different board.
+# The program uses `IF R=0 THEN LET R=5237`, so any nonzero R we inject
+# here wins over the default. $RANDOM is 15 bits on bash/zsh; multiply by
+# PID ($$) for a bit more spread. Override with REG_RS_SEED for repro.
+SEED="${REG_RS_SEED:-$(( ($RANDOM * 31 + $$) | 1 ))}"
+
+"$PV24T" "$P24" -n 0 -i "LET R=$SEED"$'\n'"$(cat "$BAS")"

@@ -1,0 +1,4 @@
+command = "./tests/robot-chase/driver.sh wall-block"
+timeout = 30
+exit_code = 0
+desc = "Robot Chase: wall-block"
