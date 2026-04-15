@@ -1,0 +1,569 @@
+
+
+
+
+I'm adding text-based games to my BASIC cor24 web demos.  Here's one that was requested: https://en.wikipedia.org/wiki/Chase_(video_game).   Can we implement a simple version of this?  Turn-based, similar output to LRS and SRS for startrek.  
+
+I’m pulling the core rules and then I’ll map them into a COR24-friendly, text-grid, turn-based BASIC version with SRS/LRS-style display.
+
+Thought for 13s
+Yes. A simple, COR24-web-demo-friendly Chase works very well as a turn-based text grid.
+
+Requirements restated
+You want a version of Chase / Robots that:
+
+is turn-based
+
+uses text output
+
+feels a bit like SRS/LRS in Star Trek
+
+is simple enough to fit into your BASIC demo style
+
+does not need full historical fidelity, just the recognizable gameplay loop
+
+The core historical gameplay is: the player moves on a 2D grid, robots move one square closer after every player turn, and the player wins by making robots collide with each other or obstacles; many versions also include teleport. 
+
+Good fit for your BASIC web demos
+A clean design is:
+
+SRS = show the full local playfield
+
+LRS = show a coarse summary by regions
+
+Move = keypad-style direction
+
+T = teleport
+
+W = wait
+
+robots move one step toward player after each turn, including diagonals, which matches the classic gameplay. 
+
+Recommended minimal rules
+Board
+Use something like:
+
+12 x 12 or 16 x 16
+
+symbols:
+
+P = player
+
+R = robot
+
+* = wreckage / rubble
+
+. = empty
+
+Turn flow
+Show status
+
+Player enters command
+
+Player moves or teleports
+
+All robots move one step toward player
+
+Resolve collisions
+
+Check win/loss
+
+Collision rules
+robot reaches player → lose
+
+robot + robot collide → both removed, leave *
+
+robot hits * → robot removed
+
+player steps onto * → lose or forbid move
+I would make it lose because it keeps the rules simple
+
+Commands
+Numeric keypad style is ideal:
+
+7 8 9
+
+4 5 6
+
+1 2 3
+
+Where:
+
+8 north
+
+2 south
+
+4 west
+
+6 east
+
+diagonals accordingly
+
+5 wait
+
+0 teleport
+
+That gives a compact single-character command interface.
+
+SRS / LRS style
+SRS
+Print the whole map, for example:
+
+TURN 12   ROBOTS 7   TELEPORTS 1
+
+   123456789012
+ 1 ............
+ 2 ....R.......
+ 3 ............
+ 4 ......*.....
+ 5 .....R......
+ 6 .......P....
+ 7 ........R...
+ 8 ............
+ 9 ..R.........
+10 ............
+11 .....*......
+12 .........R..
+LRS
+Divide the board into 3x3 regions and print counts, similar in spirit to Star Trek sensor summaries:
+
+Each cell could show:
+
+robots count
+
+wreck count
+
+whether player is present
+
+Example:
+
+LRS (R/W/P)
+  2/0/0   1/1/0   0/0/0
+  1/0/0   1/1/1   1/0/0
+  0/0/0   0/1/0   1/0/0
+That keeps the “sensor” feel without needing fancy graphics.
+
+Architecture
+For old-school BASIC and especially for a web-demo BASIC, I would avoid per-cell strings if possible.
+
+State
+Use parallel arrays:
+
+PX, PY player position
+
+RX(I), RY(I), RA(I) robot x, y, alive
+
+WX(I), WY(I) wreck list
+
+or a board array B(X,Y) for rendering only
+
+Recommended logic split
+Even in BASIC, conceptually break it into:
+
+init game
+
+render SRS
+
+render LRS
+
+read command
+
+move player
+
+move robots
+
+resolve collisions
+
+check end state
+
+If your BASIC has GOSUB, that is enough.
+
+Simple BASIC version
+Below is a deliberately plain version, aimed at classic structured BASIC style, not fancy dialect-specific features.
+
+It assumes:
+
+integer arrays
+
+INPUT for commands
+
+GOSUB
+
+RND
+
+printable text grid
+
+You may need tiny syntax edits for your COR24 BASIC dialect.
+
+10 REM CHASE - SIMPLE TURN-BASED TEXT VERSION
+20 REM P = PLAYER, R = ROBOT, * = WRECK, . = EMPTY
+
+30 DIM RX(40),RY(40),RA(40)
+40 DIM WX(80),WY(80),WA(80)
+50 DIM B(20,20)
+
+60 GOSUB 1000
+70 GOSUB 2000
+80 IF GAMEOVER=1 THEN GOTO 9000
+90 GOSUB 3000
+100 IF GAMEOVER=1 THEN GOTO 9000
+110 GOTO 70
+
+1000 REM INIT
+1010 SX=12: SY=12
+1020 NR=8
+1030 NW=0
+1040 TELE=2
+1050 TURN=0
+1060 GAMEOVER=0
+1070 WIN=0
+
+1080 PX=1+INT(RND(1)*SX)
+1090 PY=1+INT(RND(1)*SY)
+
+1100 FOR I=1 TO NR
+1110 RX(I)=1+INT(RND(1)*SX)
+1120 RY(I)=1+INT(RND(1)*SY)
+1130 RA(I)=1
+1140 IF RX(I)=PX AND RY(I)=PY THEN 1110
+1150 NEXT I
+1160 RETURN
+
+2000 REM MAIN DISPLAY
+2010 TURN=TURN+1
+2020 GOSUB 5000
+2030 PRINT
+2040 PRINT "TURN ";TURN;"  ROBOTS ";GOSUBRET;"  TELEPORTS ";TELE
+2050 GOSUB 6000
+2060 PRINT
+2070 PRINT "COMMAND: 7 8 9 / 4 5 6 / 1 2 3, 0=TELEPORT, L=LRS"
+2080 INPUT C$
+2090 IF C$="L" OR C$="l" THEN GOSUB 7000: GOTO 2070
+2100 CMD$=C$
+2110 RETURN
+
+3000 REM PROCESS TURN
+3010 GOSUB 3100
+3020 IF GAMEOVER=1 THEN RETURN
+3030 GOSUB 4000
+3040 GOSUB 4200
+3050 GOSUB 4300
+3060 RETURN
+
+3100 REM MOVE PLAYER
+3110 NX=PX: NY=PY
+
+3120 IF CMD$="7" THEN NX=PX-1: NY=PY-1
+3130 IF CMD$="8" THEN NX=PX:   NY=PY-1
+3140 IF CMD$="9" THEN NX=PX+1: NY=PY-1
+3150 IF CMD$="4" THEN NX=PX-1: NY=PY
+3160 IF CMD$="5" THEN NX=PX:   NY=PY
+3170 IF CMD$="6" THEN NX=PX+1: NY=PY
+3180 IF CMD$="1" THEN NX=PX-1: NY=PY+1
+3190 IF CMD$="2" THEN NX=PX:   NY=PY+1
+3200 IF CMD$="3" THEN NX=PX+1: NY=PY+1
+
+3210 IF CMD$="0" THEN GOSUB 3300: RETURN
+
+3220 IF NX<1 OR NX>SX OR NY<1 OR NY>SY THEN RETURN
+
+3230 FOR I=1 TO NW
+3240 IF WA(I)=1 AND WX(I)=NX AND WY(I)=NY THEN GAMEOVER=1: RETURN
+3250 NEXT I
+
+3260 PX=NX: PY=NY
+3270 RETURN
+
+3300 REM TELEPORT
+3310 IF TELE<=0 THEN RETURN
+3320 TELE=TELE-1
+3330 PX=1+INT(RND(1)*SX)
+3340 PY=1+INT(RND(1)*SY)
+
+3350 FOR I=1 TO NW
+3360 IF WA(I)=1 AND WX(I)=PX AND WY(I)=PY THEN GAMEOVER=1: RETURN
+3370 NEXT I
+3380 RETURN
+
+4000 REM MOVE ROBOTS
+4010 FOR I=1 TO NR
+4020 IF RA(I)=0 THEN 4100
+
+4030 IF RX(I)<PX THEN RX(I)=RX(I)+1
+4040 IF RX(I)>PX THEN RX(I)=RX(I)-1
+4050 IF RY(I)<PY THEN RY(I)=RY(I)+1
+4060 IF RY(I)>PY THEN RY(I)=RY(I)-1
+
+4070 IF RX(I)=PX AND RY(I)=PY THEN GAMEOVER=1
+4100 NEXT I
+4110 RETURN
+
+4200 REM ROBOTS HIT WRECKS
+4210 FOR I=1 TO NR
+4220 IF RA(I)=0 THEN 4280
+4230 FOR J=1 TO NW
+4240 IF WA(J)=1 AND RX(I)=WX(J) AND RY(I)=WY(J) THEN RA(I)=0
+4250 NEXT J
+4280 NEXT I
+4290 RETURN
+
+4300 REM ROBOT-ROBOT COLLISIONS CREATE WRECKS
+4310 FOR I=1 TO NR
+4320 IF RA(I)=0 THEN 4390
+4330 FOR J=I+1 TO NR
+4340 IF RA(J)=0 THEN 4380
+4350 IF RX(I)=RX(J) AND RY(I)=RY(J) THEN GOSUB 4400
+4380 NEXT J
+4390 NEXT I
+
+4395 REM CHECK WIN
+4396 ALIVE=0
+4397 FOR I=1 TO NR
+4398 IF RA(I)=1 THEN ALIVE=ALIVE+1
+4399 NEXT I
+4400 IF ALIVE=0 THEN GAMEOVER=1: WIN=1
+4405 RETURN
+
+4400 REM MAKE WRECK AT ROBOT COLLISION
+4410 NW=NW+1
+4420 WX(NW)=RX(I)
+4430 WY(NW)=RY(I)
+4440 WA(NW)=1
+4450 RA(I)=0
+4460 RA(J)=0
+4470 RETURN
+
+5000 REM CLEAR BOARD ARRAY
+5010 FOR Y=1 TO SY
+5020 FOR X=1 TO SX
+5030 B(X,Y)=0
+5040 NEXT X
+5050 NEXT Y
+
+5060 FOR I=1 TO NW
+5070 IF WA(I)=1 THEN B(WX(I),WY(I))=3
+5080 NEXT I
+
+5090 FOR I=1 TO NR
+5100 IF RA(I)=1 THEN B(RX(I),RY(I))=2
+5110 NEXT I
+
+5120 B(PX,PY)=1
+
+5130 GOSUBRET=0
+5140 FOR I=1 TO NR
+5150 IF RA(I)=1 THEN GOSUBRET=GOSUBRET+1
+5160 NEXT I
+5170 RETURN
+
+6000 REM PRINT SRS
+6010 PRINT "   ";
+6020 FOR X=1 TO SX
+6030 PRINT X MOD 10;
+6040 NEXT X
+6050 PRINT
+
+6060 FOR Y=1 TO SY
+6070 IF Y<10 THEN PRINT " ";
+6080 PRINT Y;
+6090 PRINT " ";
+6100 FOR X=1 TO SX
+6110 IF B(X,Y)=0 THEN PRINT ".";
+6120 IF B(X,Y)=1 THEN PRINT "P";
+6130 IF B(X,Y)=2 THEN PRINT "R";
+6140 IF B(X,Y)=3 THEN PRINT "*";
+6150 NEXT X
+6160 PRINT
+6170 NEXT Y
+6180 RETURN
+
+7000 REM PRINT LRS - 3X3 REGIONS
+7010 PRINT
+7020 PRINT "LRS (R/W/P)"
+7030 RXS=SX/3
+7040 RYS=SY/3
+
+7050 FOR GY=0 TO 2
+7060 FOR GX=0 TO 2
+7070 RC=0: WC=0: PC=0
+7080 X1=GX*RXS+1
+7090 X2=(GX+1)*RXS
+7100 Y1=GY*RYS+1
+7110 Y2=(GY+1)*RYS
+
+7120 FOR I=1 TO NR
+7130 IF RA(I)=1 THEN IF RX(I)>=X1 AND RX(I)<=X2 AND RY(I)>=Y1 AND RY(I)<=Y2 THEN RC=RC+1
+7140 NEXT I
+
+7150 FOR I=1 TO NW
+7160 IF WA(I)=1 THEN IF WX(I)>=X1 AND WX(I)<=X2 AND WY(I)>=Y1 AND WY(I)<=Y2 THEN WC=WC+1
+7170 NEXT I
+
+7180 IF PX>=X1 AND PX<=X2 AND PY>=Y1 AND PY<=Y2 THEN PC=1
+
+7190 PRINT " ";RC;"/";WC;"/";PC;" ";
+7200 NEXT GX
+7210 PRINT
+7220 NEXT GY
+7230 PRINT
+7240 RETURN
+
+9000 PRINT
+9010 IF WIN=1 THEN PRINT "YOU WIN!"
+9020 IF WIN=0 THEN PRINT "YOU WERE CAUGHT."
+9030 END
+Notes on that BASIC
+What it already does
+random player placement
+
+random robots
+
+8-direction movement
+
+wait
+
+teleport
+
+robot pursuit
+
+robot/robot wreck creation
+
+robot/wreck destruction
+
+win/loss
+
+SRS
+
+LRS
+
+What you may want to tweak
+The line:
+
+2040 PRINT "TURN ";TURN;"  ROBOTS ";GOSUBRET;"  TELEPORTS ";TELE
+uses GOSUBRET as a crude alive-robot count set by the render routine. You may want to rename that to ALIVECOUNT for clarity.
+
+Why this design is good for COR24 demos
+Benefits
+very little state
+
+all-text rendering
+
+no need for curses/screen control
+
+deterministic turn loop
+
+easy to explain in educational demos
+
+easy to expand later
+
+Risks
+large arrays if your BASIC is tight on memory
+
+full-board redraw each turn may be slow on a very minimal interpreter
+
+input handling may differ by your BASIC dialect
+
+Easy simplifications if needed
+If the interpreter is tiny, simplify by:
+
+using 10x10 board
+
+max 6 robots
+
+no separate wreck array, just board marks
+
+no LRS at first
+
+no teleport at first
+
+Suggested next iteration
+I would build it in three stages:
+
+Stage 1
+SRS only
+
+movement
+
+robots move
+
+collisions
+
+no teleport
+
+Stage 2
+add teleport
+
+add wreckage
+
+Stage 3
+add LRS
+
+add levels
+
+increase robots by level
+
+That keeps debugging manageable.
+
+Nice historical-feel polish
+To make it feel closer to your Star Trek demos, use commands like:
+
+SRS
+
+LRS
+
+MOV 8
+
+MOV 7
+
+TEL
+
+instead of single-character input.
+
+Internally, that is just a parser layer over the same movement engine.
+
+For example:
+
+MOV 8 → north
+
+MOV 3 → southeast
+
+TEL → teleport
+
+WAIT → hold position
+
+That gives it the same “typed command” flavor as old text games.
+
+Best small enhancement
+Add a danger meter before accepting the move:
+
+count robots adjacent to player
+
+count safe squares reachable in one move
+
+print something like:
+
+DANGER 5   SAFE MOVES 2
+That makes it much more playable in text mode.
+
+Bottom line
+Yes — this is a very good fit.
+
+The simplest durable version is:
+
+full-board SRS
+
+coarse 3x3 LRS
+
+keypad movement
+
+robot collision wreckage
+
+optional teleport
+
+That preserves the recognizable Chase gameplay while matching the style of classic text-based Star Trek displays. The underlying gameplay model—turn-based movement on a rectangular grid, robots stepping toward the player, collision-based destruction, and optional teleport—is consistent with the classic description of Chase and its descendants. 
+
+I can also convert this into a more Dartmouth/Creative-Computing-style BASIC listing with line numbers and less structured variable naming, if you want the retro feel pushed further.
+
+
+
+

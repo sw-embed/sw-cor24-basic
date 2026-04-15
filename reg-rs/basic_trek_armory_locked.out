@@ -1,27 +1,21 @@
 COR24 BASIC V1
 READY
 >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
-
 *** STAR TREK: DECAYING ORBIT ***
-
 
 YOU AWAKEN ALONE ON THE BRIDGE OF THE
 U.S.S. ENTERPRISE. RED LIGHTS FLASH.
 THE SHIP SHUDDERS.
 
-
 COMPUTER: WARNING - STABLE ORBIT LOST
 COMPUTER: ENGINES OFFLINE
 COMPUTER: ORBITAL DECAY IN PROGRESS
 
-
 RESTORE ENGINE POWER BEFORE THE SHIP
 BURNS UP. PICK 8 FOR HELP.
 
-
 ----------------------------------------
 TURNS LEFT 30
-
 
 BRIDGE
 THE BRIDGE IS DESERTED. THE MAIN
@@ -31,24 +25,20 @@ THE TURBOLIFT DOORS STAND OPEN.
 A PHASER LIES UNDER THE CAPTAIN'S CHAIR.
 EXITS: 2=TURBOLIFT
 
-
 1=LOOK 2=INV  3=GO    4=TAKE
 5=USE  6=THROW 7=FIRE 8=HELP 0=QUIT
 COMMAND GO TO ROOM# ----------------------------------------
 TURNS LEFT 29
-
 
 TURBOLIFT
 THE TURBOLIFT HUMS ON EMERGENCY
 POWER. DECK BUTTONS GLOW DIMLY.
 EXITS: 1=BRIDGE 3=CORRIDOR 6=ENGINEERING
 
-
 1=LOOK 2=INV  3=GO    4=TAKE
 5=USE  6=THROW 7=FIRE 8=HELP 0=QUIT
 COMMAND GO TO ROOM# ----------------------------------------
 TURNS LEFT 28
-
 
 CORRIDOR
 A CORRIDOR STRETCHES FORE AND AFT.
@@ -56,7 +46,6 @@ EMERGENCY LIGHTS PULSE ALONG THE WALLS.
 EXITS: 2=TURBOLIFT 4=QUARTERS
        5=STORAGE   7=ARMORY
        9=COMPUTER
-
 
 1=LOOK 2=INV  3=GO    4=TAKE
 5=USE  6=THROW 7=FIRE 8=HELP 0=QUIT
@@ -64,7 +53,6 @@ COMMAND GO TO ROOM# ARMORY DOOR LOCKED - NEED ID CARD.
 ----------------------------------------
 TURNS LEFT 27
 
-
 CORRIDOR
 A CORRIDOR STRETCHES FORE AND AFT.
 EMERGENCY LIGHTS PULSE ALONG THE WALLS.
@@ -72,10 +60,8 @@ EXITS: 2=TURBOLIFT 4=QUARTERS
        5=STORAGE   7=ARMORY
        9=COMPUTER
 
-
 1=LOOK 2=INV  3=GO    4=TAKE
 5=USE  6=THROW 7=FIRE 8=HELP 0=QUIT
 COMMAND 
-
 *** COMMAND RESIGNED ***
 >

@@ -1,27 +1,21 @@
 COR24 BASIC V1
 READY
 >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
-
 *** STAR TREK: DECAYING ORBIT ***
-
 
 YOU AWAKEN ALONE ON THE BRIDGE OF THE
 U.S.S. ENTERPRISE. RED LIGHTS FLASH.
 THE SHIP SHUDDERS.
 
-
 COMPUTER: WARNING - STABLE ORBIT LOST
 COMPUTER: ENGINES OFFLINE
 COMPUTER: ORBITAL DECAY IN PROGRESS
 
-
 RESTORE ENGINE POWER BEFORE THE SHIP
 BURNS UP. PICK 8 FOR HELP.
 
-
 ----------------------------------------
 TURNS LEFT 30
-
 
 BRIDGE
 THE BRIDGE IS DESERTED. THE MAIN
@@ -30,7 +24,6 @@ LARGER. A DAMAGED CONSOLE SPARKS.
 THE TURBOLIFT DOORS STAND OPEN.
 A PHASER LIES UNDER THE CAPTAIN'S CHAIR.
 EXITS: 2=TURBOLIFT
-
 
 1=LOOK 2=INV  3=GO    4=TAKE
 5=USE  6=THROW 7=FIRE 8=HELP 0=QUIT
@@ -40,7 +33,6 @@ ITEM# YOU DON'T SEE THAT HERE.
 ----------------------------------------
 TURNS LEFT 29
 
-
 BRIDGE
 THE BRIDGE IS DESERTED. THE MAIN
 VIEWSCREEN SHOWS A PLANET GROWING
@@ -48,7 +40,6 @@ LARGER. A DAMAGED CONSOLE SPARKS.
 THE TURBOLIFT DOORS STAND OPEN.
 A PHASER LIES UNDER THE CAPTAIN'S CHAIR.
 EXITS: 2=TURBOLIFT
-
 
 1=LOOK 2=INV  3=GO    4=TAKE
 5=USE  6=THROW 7=FIRE 8=HELP 0=QUIT
@@ -58,7 +49,6 @@ ITEM# YOU DON'T SEE THAT HERE.
 ----------------------------------------
 TURNS LEFT 28
 
-
 BRIDGE
 THE BRIDGE IS DESERTED. THE MAIN
 VIEWSCREEN SHOWS A PLANET GROWING
@@ -67,10 +57,8 @@ THE TURBOLIFT DOORS STAND OPEN.
 A PHASER LIES UNDER THE CAPTAIN'S CHAIR.
 EXITS: 2=TURBOLIFT
 
-
 1=LOOK 2=INV  3=GO    4=TAKE
 5=USE  6=THROW 7=FIRE 8=HELP 0=QUIT
 COMMAND 
-
 *** COMMAND RESIGNED ***
 >

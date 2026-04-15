@@ -185,7 +185,7 @@ else if(i<ll)and(lb[i]='+')then i:=i+1;
 procedure do_print;
 var dn,nl,n,i:integer;
 begin dn:=0;nl:=1;
-   if tb[ep]=0 then begin pn;dn:=1 end;
+   if tb[ep]=0 then begin pn;dn:=1;nl:=0 end;
    while(err=0)and(dn=0)do begin
       if tb[ep]=TS then begin ep:=ep+1;n:=tb[ep];ep:=ep+1;i:=0;
 	 while i<n do begin pc(chr(tb[ep]));ep:=ep+1;i:=i+1 end end

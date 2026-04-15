@@ -92,6 +92,18 @@ Coordinates use rows A-H and columns 1-8.
 
 A validation transcript is at `tests/startrek-transcript.txt`.
 
+## Robot Chase demo
+
+`examples/robot-chase.bas` is a 9×9 text-grid port of the 1970s game
+*Chase* (a.k.a. *Robots*), translated from a QBasic-style listing in
+`docs/robot-chase.txt`. Keypad movement (1–9, 5=wait), teleport (0),
+and a 3×3 regional summary (10=LRS) in the same spirit as the
+Star Trek SRS/LRS displays.
+
+```sh
+./scripts/demo-robot-chase.sh
+```
+
 ## Trek Adventure demo
 
 `examples/trek-adventure.bas` is a text adventure translated from an
@@ -129,6 +141,7 @@ for the full gallery.
 ./scripts/demo-memdump.sh
 ./scripts/demo-startrek.sh
 ./scripts/demo-trek-adventure.sh
+./scripts/demo-robot-chase.sh
 ```
 
 ## Dependencies
