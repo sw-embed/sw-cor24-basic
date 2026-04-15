@@ -104,6 +104,15 @@ numeric menus (integer-only dialect, no string variables).
 ./scripts/demo-trek-adventure.sh
 ```
 
+Regression tests for the adventure live at `tests/trek-adventure/`. Each
+case is a triple: `*.in` (lines fed to INPUT), `*.expect` (substrings
+that must appear), `*.reject` (substrings that must not). Run the full
+suite with:
+
+```sh
+./tests/trek-adventure/run.sh
+```
+
 ## Demos
 
 CLI demos under `scripts/demo-*.sh`. See [docs/demos.md](docs/demos.md)

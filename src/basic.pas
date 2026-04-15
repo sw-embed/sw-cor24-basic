@@ -261,7 +261,7 @@ begin ep:=0;err:=0;rd:=1;
    else begin pc('?');pc(' ') end;
       if(tb[ep]>=VA)and(tb[ep]<=VA+25)then begin vi:=tb[ep]-VA;ep:=ep+1;
 	 read_line;pi;
-	 while pok=0 do begin pc('?');pc('R');pc('E');pc('D');pc('O');pc(' ');read_line;pi end;
+	 while(pok=0)and(running=1)do begin pc('?');pc('R');pc('E');pc('D');pc('O');pc(' ');read_line;pi end;
 	 vars[vi]:=ev end else err:=1 end
    else if t=FK+3 then begin ep:=ep+1;p_expr(5);
       if(err=0)and(tb[ep]=FK+4)then begin ep:=ep+1;if ev<>0 then rd:=1 end

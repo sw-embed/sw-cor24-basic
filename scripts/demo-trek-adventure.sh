@@ -15,5 +15,8 @@ if [ ! -f "$P24" ]; then
   exit 1
 fi
 
-# Pipe the .bas program in, then leave stdin open for interactive play.
-{ cat "$BAS"; cat; } | "$PV24T" "$P24" -n 0
+# Preload the .bas via -i so pv24t's stdin stays connected to the terminal.
+# That way the terminal's line discipline (cooked mode, local echo) shows
+# your typed characters. Piping via { cat; cat; } makes stdin a pipe, which
+# breaks the visible echo feedback on some terminals.
+"$PV24T" "$P24" -n 0 -i "$(cat "$BAS")"
