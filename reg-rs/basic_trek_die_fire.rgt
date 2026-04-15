@@ -1,0 +1,4 @@
+command = "./tests/trek-adventure/driver.sh die-fire"
+timeout = 30
+exit_code = 0
+desc = "Trek Adventure: die-fire"

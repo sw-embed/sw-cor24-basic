@@ -1,0 +1,4 @@
+command = "./tests/trek-adventure/driver.sh armory-open"
+timeout = 30
+exit_code = 0
+desc = "Trek Adventure: armory-open"

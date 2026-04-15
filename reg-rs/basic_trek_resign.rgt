@@ -1,0 +1,4 @@
+command = "./tests/trek-adventure/driver.sh resign"
+timeout = 30
+exit_code = 0
+desc = "Trek Adventure: resign"

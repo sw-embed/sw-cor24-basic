@@ -104,13 +104,14 @@ numeric menus (integer-only dialect, no string variables).
 ./scripts/demo-trek-adventure.sh
 ```
 
-Regression tests for the adventure live at `tests/trek-adventure/`. Each
-case is a triple: `*.in` (lines fed to INPUT), `*.expect` (substrings
-that must appear), `*.reject` (substrings that must not). Run the full
-suite with:
+Regression tests use `reg-rs` (golden-output regression tool, mirrors
+the convention in sibling `sw-cor24-*` repos). Baselines live at
+`reg-rs/basic_trek_*.{rgt,out}`; the input sequences live at
+`tests/trek-adventure/cases/*.in` and are fed through
+`tests/trek-adventure/driver.sh`. Run the full suite with:
 
 ```sh
-./tests/trek-adventure/run.sh
+./scripts/test.sh          # wraps: reg-rs run -p basic_ --parallel
 ```
 
 ## Demos

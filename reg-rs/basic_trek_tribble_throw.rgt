@@ -1,0 +1,4 @@
+command = "./tests/trek-adventure/driver.sh tribble-throw"
+timeout = 30
+exit_code = 0
+desc = "Trek Adventure: tribble-throw"

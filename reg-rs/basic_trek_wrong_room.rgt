@@ -1,0 +1,4 @@
+command = "./tests/trek-adventure/driver.sh wrong-room"
+timeout = 30
+exit_code = 0
+desc = "Trek Adventure: wrong-room"
