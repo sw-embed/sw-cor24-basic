@@ -56,6 +56,32 @@ session. Future work belongs in the NEXT step, not this one.
 - **Do NOT continue working** after `agentrail complete`
 - **Commit before complete** — always commit first, then record completion
 
+## Branch and PR Workflow
+
+Work happens on `feat/<slug>` branches off `dev`. A branch accumulates
+commits until the work is complete; the final step is a rename from
+`feat/<slug>` to `pr/<slug>` — that rename IS the handoff. "PR" here
+means a `pr/<slug>` branch awaiting review, not a GitHub pull request
+opened by the dev agent. A separate release engineer agent picks up
+the `pr/` branch, merges it into `dev`, and pushes to GitHub.
+
+Dev agents (that's you) have NO remote write access. Do not invoke
+`git push`, `gh pr create`, or any other GitHub-side command. The
+`push` phase of `/mw-cp` does not apply on `feat/*` or `pr/*` branches
+— stop at the commit step.
+
+Typical flow for a fix or feature:
+
+```bash
+git checkout dev
+git checkout -b feat/<slug>
+# ... do the work, commit (no push) ...
+git branch -m feat/<slug> pr/<slug>   # handoff
+```
+
+`dev` tracks integrated work; merges from `pr/*` land there before
+reaching `main`.
+
 ## Useful Commands
 
 ```bash
