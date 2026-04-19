@@ -16,10 +16,13 @@ monitor/scripting/hardware bring-up work.
 
 ### 1. START (do this FIRST, before anything else)
 ```bash
-agentrail next
+onboarding     # paths, branch policy, helpers, current repo state
+agentrail next # current step prompt + plan context
 ```
-Read the output carefully. It contains your current step, prompt,
-plan context, and any relevant skills/trajectories.
+`onboarding` is the devgroup session briefing (it's on PATH). Read
+both outputs carefully before touching code — `onboarding` surfaces
+the branch policy, the `dg-*` helpers, and any pending `pr/*`
+branches waiting for the coordinator.
 
 ### 2. BEGIN (immediately after reading the next output)
 ```bash
@@ -55,6 +58,52 @@ session. Future work belongs in the NEXT step, not this one.
 - **Do NOT ask for permission** — the step prompt is the instruction
 - **Do NOT continue working** after `agentrail complete`
 - **Commit before complete** — always commit first, then record completion
+
+## Branch and PR Workflow
+
+Work happens on `feat/<slug>` or `fix/<slug>` branches off `dev`
+(`fix/` is the bug-fix flavor of `feat/`). A branch accumulates
+commits until the work is complete; the final step is a rename to
+`pr/<slug>` — that rename IS the handoff. "PR" here means a
+`pr/<slug>` branch awaiting the coordinator, NOT a GitHub pull
+request opened by the dev agent. The coordinator (mike) picks up
+`pr/` branches, merges them into `dev`, and pushes.
+
+Dev agents (that's you) have NO remote write access. Do not invoke
+`git push`, `gh pr create`, or any other GitHub-side command. The
+`push` phase of `/mw-cp` does not apply on `feat/*`, `fix/*`, or
+`pr/*` branches — stop at the commit step.
+
+Base new branches on `origin/dev` (fall back to `origin/main` only
+when `origin/dev` doesn't exist yet). No history rewrites on `dev`
+or `main`; rebase is fine on your own `feat/*` / `fix/*`.
+
+Prefer the `dg-*` helpers (on `$PATH` via SCRIPTROOT) over hand-
+rolling the git plumbing:
+
+```bash
+dg-new-feature <slug>     # git switch dev && git switch -c feat/<slug>
+dg-new-fix <slug>         # git switch dev && git switch -c fix/<slug>
+dg-mark-pr                # rename current feat/*|fix/* to pr/* (handoff)
+dg-list-pr                # list local pr/* branches signalling ready
+dg-reap                   # fetch; fast-forward dev; delete pr/* merged into origin/dev
+dg-env  /  dg-policy      # environment dump / branch-policy reminder
+```
+
+Typical flow for a fix:
+
+```bash
+dg-new-fix <slug>
+# ... do the work, commit (no push) ...
+dg-mark-pr                # now on pr/<slug>; coordinator will relay
+```
+
+After the coordinator merges your `pr/<slug>` into `origin/dev`,
+clean up with `dg-reap` (this is what "reap" means in this project —
+not a GitHub-API cleanup, just `branch -D` for `pr/*` already in
+`origin/dev`).
+
+Full policy: `/disk1/github/softwarewrighter/devgroup/docs/branching-pr-strategy.md`.
 
 ## Useful Commands
 
