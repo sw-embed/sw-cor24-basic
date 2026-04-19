@@ -161,8 +161,12 @@ for the full gallery.
 - [Implementation Plan](docs/plan.md)
 - [Research Notes](docs/research.txt)
 
+## Links
+
+- Blog: [Software Wrighter Lab](https://software-wrighter-lab.github.io/)
+- Discord: [Join the community](https://discord.com/invite/Ctzk5uHggZ)
+- YouTube: [Software Wrighter](https://www.youtube.com/@SoftwareWrighter)
+
 ## License
 
-MIT — see [LICENSE](LICENSE) for details.
-
-Copyright (c) 2026 Michael A Wright
+Copyright (c) 2026 Michael A Wright. MIT-licensed; see [LICENSE](LICENSE).
