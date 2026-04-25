@@ -1,8 +1,8 @@
 program Basic;
 const
-   FK=128;TP=160;TG=169;VA=192;TI=224;TS=225;KW=8;NK=28;PS=16384;
+   FK=128;TP=160;TG=169;VA=192;TI=224;TS=225;KW=8;NK=29;PS=16384;AS=1024;
 var
-   kt:array[0..223]of char;
+   kt:array[0..231]of char;
    lb:array[0..79]of char;
    ll,lp:integer;
    tb:array[0..127]of integer;
@@ -18,7 +18,10 @@ var
    fl:array[0..15]of integer;
    fs:array[0..15]of integer;
    fr:array[0..15]of integer;
-   gp,fp,col,pok,el,running,mi,dl,ds:integer;
+   apool:array[0..1023]of integer;
+   abase:array[0..25]of integer;
+   asize:array[0..25]of integer;
+   gp,fp,col,pok,el,running,mi,dl,ds,apsp:integer;
 procedure ks(i:integer;a,b,c,d,e,f,g,h:char);
 var p:integer;
 begin p:=i*KW;kt[p]:=a;kt[p+1]:=b;kt[p+2]:=c;kt[p+3]:=d;kt[p+4]:=e;kt[p+5]:=f;kt[p+6]:=g;kt[p+7]:=h end;
@@ -39,7 +42,7 @@ begin
    ks(22,'P','O','K','E',' ',' ',' ',' ');ks(23,'A','B','S',' ',' ',' ',' ',' ');
    ks(24,'C','H','R','$',' ',' ',' ',' ');
    ks(25,'D','A','T','A',' ',' ',' ',' ');ks(26,'R','E','A','D',' ',' ',' ',' ');
-   ks(27,'R','E','S','T','O','R','E',' ')
+   ks(27,'R','E','S','T','O','R','E',' ');ks(28,'D','I','M',' ',' ',' ',' ',' ')
 end;
 function kl(i:integer):integer;
 var p,n:integer;
@@ -110,11 +113,17 @@ begin p:=store_find(ln);if p>=0 then begin sz:=3+ord(pg[p+2]);i:=p;
       pg[p]:=chr(ln div 256);pg[p+1]:=chr(ln mod 256);pg[p+2]:=chr(tl);
       i:=0;while i<tl do begin pg[p+3+i]:=chr(tb[i]);i:=i+1 end;pe:=pe+need end end;
 procedure p_expr(lev:integer);
-var v,op,r:integer;b:boolean;
+var v,op,r,vi:integer;b:boolean;
 begin
    if lev=0 then begin v:=0;
       if tb[ep]=TI then begin ep:=ep+1;v:=tb[ep]*65536+tb[ep+1]*256+tb[ep+2];ep:=ep+3 end
-   else if(tb[ep]>=VA)and(tb[ep]<=VA+25)then begin v:=vars[tb[ep]-VA];ep:=ep+1 end
+   else if(tb[ep]>=VA)and(tb[ep]<=VA+25)then begin vi:=tb[ep]-VA;ep:=ep+1;
+      if tb[ep]=176 then begin ep:=ep+1;p_expr(5);
+	 if(err=0)and(tb[ep]=177)then ep:=ep+1 else if err=0 then err:=1;
+	 if err=0 then begin
+	    if(abase[vi]<0)or(ev<0)or(ev>=asize[vi])then err:=8
+	    else v:=apool[abase[vi]+ev] end
+      end else v:=vars[vi] end
    else if tb[ep]=176 then begin ep:=ep+1;p_expr(5);v:=ev;
       if(err=0)and(tb[ep]=177)then ep:=ep+1 else if err=0 then err:=1 end
    else if tb[ep]=FK+21 then begin ep:=ep+1;
@@ -205,10 +214,34 @@ begin dn:=0;nl:=1;
    else dn:=1 end;
    if(err=0)and(nl=1)then pn end;
 procedure do_let;
-var vi:integer;
+var vi,sub:integer;
 begin if(tb[ep]>=VA)and(tb[ep]<=VA+25)then begin vi:=tb[ep]-VA;ep:=ep+1;
-   if tb[ep]=TP+4 then begin ep:=ep+1;p_expr(5);vars[vi]:=ev end else err:=1
+   if tb[ep]=176 then begin ep:=ep+1;p_expr(5);sub:=ev;
+      if(err=0)and(tb[ep]=177)then ep:=ep+1 else if err=0 then err:=1;
+      if(err=0)and(tb[ep]=TP+4)then begin ep:=ep+1;p_expr(5);
+	 if err=0 then begin
+	    if(abase[vi]<0)or(sub<0)or(sub>=asize[vi])then err:=8
+	    else apool[abase[vi]+sub]:=ev end
+      end else if err=0 then err:=1
+   end else if tb[ep]=TP+4 then begin ep:=ep+1;p_expr(5);vars[vi]:=ev end
+   else err:=1
 end else err:=1 end;
+procedure do_dim;
+var vi,sz,i:integer;done:boolean;
+begin done:=false;
+   while(err=0)and(not done)do begin
+      if(tb[ep]>=VA)and(tb[ep]<=VA+25)then begin vi:=tb[ep]-VA;ep:=ep+1;
+	 if tb[ep]=176 then begin ep:=ep+1;p_expr(5);
+	    if(err=0)and(tb[ep]=177)then begin ep:=ep+1;sz:=ev+1;
+	       if(ev<0)or(apsp+sz>AS)then err:=4
+	       else begin abase[vi]:=apsp;asize[vi]:=sz;
+		  i:=0;while i<sz do begin apool[apsp+i]:=0;i:=i+1 end;
+		  apsp:=apsp+sz end
+	    end else if err=0 then err:=1
+	 end else err:=1
+      end else err:=1;
+      if err=0 then begin
+	 if tb[ep]=178 then ep:=ep+1 else done:=true end end end;
 procedure do_list;
 var p,n,ln,j,tk,k,kn,i,lc:integer;rem:boolean;
 begin p:=0;
@@ -308,9 +341,11 @@ begin ep:=0;err:=0;rd:=1;
 	 then tl:=fr[vi] else fp:=fp-1 end
    else if(t=FK+12)or(t=FK+13)then mi:=0
    else if t=FK+14 then begin end
-   else if t=FK+16 then begin mi:=1;tl:=0;gp:=0;fp:=0;dl:=-1;ds:=0 end
+   else if t=FK+16 then begin mi:=1;tl:=0;gp:=0;fp:=0;dl:=-1;ds:=0;
+      apsp:=0;i:=0;while i<26 do begin abase[i]:=-1;asize[i]:=0;i:=i+1 end end
    else if t=FK+15 then do_list
-   else if t=FK+17 then begin pe:=0;dl:=-1;ds:=0 end
+   else if t=FK+17 then begin pe:=0;dl:=-1;ds:=0;
+      apsp:=0;i:=0;while i<26 do begin abase[i]:=-1;asize[i]:=0;i:=i+1 end end
    else if t=FK+20 then running:=0
    else if t=FK+25 then begin end
    else if t=FK+26 then begin ep:=ep+1;
@@ -324,6 +359,7 @@ begin ep:=0;err:=0;rd:=1;
       else begin p_expr(5);
 	 if err=0 then begin n:=store_find(ev);
 	    if n<0 then err:=3 else begin dl:=n;ds:=0 end end end end
+   else if t=FK+28 then begin ep:=ep+1;do_dim end
    else if t=FK+22 then begin ep:=ep+1;p_expr(5);
       if err=0 then begin n:=ev;
 	 if tb[ep]=178 then begin ep:=ep+1;p_expr(5);
@@ -335,7 +371,8 @@ begin ep:=0;err:=0;rd:=1;
    if err<>0 then begin write('?ERR ');print_int(err);
       if el>0 then begin write(' IN ');print_int(el) end;pn end end;
 begin
-   ik;pe:=0;running:=1;mi:=0;gp:=0;fp:=0;col:=0;el:=0;dl:=-1;ds:=0;ep:=0;while ep<26 do begin vars[ep]:=0;ep:=ep+1 end;
+   ik;pe:=0;running:=1;mi:=0;gp:=0;fp:=0;col:=0;el:=0;dl:=-1;ds:=0;apsp:=0;
+   ep:=0;while ep<26 do begin vars[ep]:=0;abase[ep]:=-1;asize[ep]:=0;ep:=ep+1 end;
    write('COR24 BASIC V1');pn;write('READY');pn;
    tl:=0;
    while running=1 do begin

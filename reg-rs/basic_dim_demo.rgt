@@ -1,0 +1,4 @@
+command = "./scripts/demo-dim.sh"
+timeout = 30
+exit_code = 0
+desc = "DIM end-to-end demo"

@@ -52,6 +52,7 @@ Steps:
 | 0x99 | DATA |
 | 0x9A | READ |
 | 0x9B | RESTORE |
+| 0x9C | DIM |
 
 Keywords are case-insensitive. The tokenizer uppercases input before
 matching.
@@ -249,6 +250,21 @@ and may call the expression parser.
 2. With a line number: position the read pointer at that line; the
    next READ scans forward from there for DATA values.
 3. RUN and NEW also rewind the read pointer.
+
+**DIM <name>(<size>) [, <name>(<size>)]...**
+1. For each declaration: allocate `size+1` integer slots from a
+   shared 1024-element array pool, store the base offset and length
+   per letter, and zero-fill the new slots.
+2. Re-DIM allocates fresh from the pool (old slots leak); the new
+   array starts zero-cleared.
+3. Single-letter names A..Z; the array namespace is distinct from
+   the scalar namespace (`A` and `A()` coexist).
+4. `OUT OF MEMORY` (code 4) if the pool can't fit the new array.
+
+**Subscripted variable references** (in expressions and LET targets)
+1. `<var>(<expr>)` reads or writes the array element at index `expr`.
+2. Bounds check: 0 <= index < size; otherwise `BAD ADDRESS` (code 8).
+3. Reading or writing an un-DIMmed array also raises `BAD ADDRESS`.
 
 ## 4. Variable Model
 

@@ -1,0 +1,4 @@
+command = "./scripts/run-basic.sh tests/dim/multi.bas"
+timeout = 30
+exit_code = 0
+desc = "DIM: multi"
