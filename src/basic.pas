@@ -1,8 +1,8 @@
 program Basic;
 const
-   FK=128;TP=164;TG=173;VA=192;TI=224;TS=225;KW=8;NK=36;PS=16384;AS=1024;
+   FK=128;TP=164;TG=173;VA=192;TI=224;TS=225;KW=8;NK=37;PS=16384;AS=1024;
 var
-   kt:array[0..287]of char;
+   kt:array[0..295]of char;
    lb:array[0..79]of char;
    ll,lp:integer;
    tb:array[0..127]of integer;
@@ -21,7 +21,7 @@ var
    apool:array[0..1023]of integer;
    abase:array[0..25]of integer;
    asize:array[0..25]of integer;
-   gp,fp,col,pok,el,running,mi,dl,ds,apsp:integer;
+   gp,fp,col,pok,el,running,mi,dl,ds,apsp,ctl:integer;
 procedure ks(i:integer;a,b,c,d,e,f,g,h:char);
 var p:integer;
 begin p:=i*KW;kt[p]:=a;kt[p+1]:=b;kt[p+2]:=c;kt[p+3]:=d;kt[p+4]:=e;kt[p+5]:=f;kt[p+6]:=g;kt[p+7]:=h end;
@@ -46,7 +46,8 @@ begin
    ks(29,'O','N',' ',' ',' ',' ',' ',' ');ks(30,'M','O','D',' ',' ',' ',' ',' ');
    ks(31,'B','A','N','D',' ',' ',' ',' ');ks(32,'B','O','R',' ',' ',' ',' ',' ');
    ks(33,'B','X','O','R',' ',' ',' ',' ');ks(34,'S','H','L',' ',' ',' ',' ',' ');
-   ks(35,'S','H','R',' ',' ',' ',' ',' ')
+   ks(35,'S','H','R',' ',' ',' ',' ',' ');
+   ks(36,'C','O','N','T',' ',' ',' ',' ')
 end;
 function kl(i:integer):integer;
 var p,n:integer;
@@ -108,7 +109,7 @@ begin p:=0;r:=-1;d:=false;
       else p:=p+3+ord(pg[p+2]) end;store_find:=r end;
 procedure store_ins(ln:integer);
 var p,i,need,sz:integer;d:boolean;
-begin p:=store_find(ln);if p>=0 then begin sz:=3+ord(pg[p+2]);i:=p;
+begin ctl:=-1;p:=store_find(ln);if p>=0 then begin sz:=3+ord(pg[p+2]);i:=p;
    while i+sz<pe do begin pg[i]:=pg[i+sz];i:=i+1 end;pe:=pe-sz end;
    need:=3+tl;if pe+need<=PS then begin
       p:=0;d:=false;while(p<pe)and(not d)do begin
@@ -387,12 +388,17 @@ begin ep:=0;err:=0;rd:=1;
       vi:=fp-1;vars[fv[vi]]:=vars[fv[vi]]+fs[vi];
       if((fs[vi]>=0)and(vars[fv[vi]]<=fl[vi]))or((fs[vi]<0)and(vars[fv[vi]]>=fl[vi]))
 	 then tl:=fr[vi] else fp:=fp-1 end
-   else if(t=FK+12)or(t=FK+13)then mi:=0
+   else if t=FK+12 then begin
+      if mi=1 then begin
+	 write('S');write('T');write('O');write('P');write('P');write('E');write('D');
+	 write(' ');write('I');write('N');write(' ');print_int(el);pn;ctl:=tl end;
+      mi:=0 end
+   else if t=FK+13 then mi:=0
    else if t=FK+14 then begin end
-   else if t=FK+16 then begin mi:=1;tl:=0;gp:=0;fp:=0;dl:=-1;ds:=0;
+   else if t=FK+16 then begin mi:=1;tl:=0;gp:=0;fp:=0;dl:=-1;ds:=0;ctl:=-1;
       apsp:=0;i:=0;while i<26 do begin abase[i]:=-1;asize[i]:=0;i:=i+1 end end
    else if t=FK+15 then do_list
-   else if t=FK+17 then begin pe:=0;dl:=-1;ds:=0;
+   else if t=FK+17 then begin pe:=0;dl:=-1;ds:=0;ctl:=-1;
       apsp:=0;i:=0;while i<26 do begin abase[i]:=-1;asize[i]:=0;i:=i+1 end end
    else if t=FK+20 then running:=0
    else if t=FK+25 then begin end
@@ -409,6 +415,8 @@ begin ep:=0;err:=0;rd:=1;
 	    if n<0 then err:=3 else begin dl:=n;ds:=0 end end end end
    else if t=FK+28 then begin ep:=ep+1;do_dim end
    else if t=FK+29 then begin ep:=ep+1;do_on end
+   else if t=FK+36 then begin
+      if ctl<0 then err:=16 else begin tl:=ctl;ctl:=-1;mi:=1 end end
    else if t=FK+22 then begin ep:=ep+1;p_expr(6);
       if err=0 then begin n:=ev;
 	 if tb[ep]=178 then begin ep:=ep+1;p_expr(6);
@@ -420,7 +428,7 @@ begin ep:=0;err:=0;rd:=1;
    if err<>0 then begin write('?ERR ');print_int(err);
       if el>0 then begin write(' IN ');print_int(el) end;pn end end;
 begin
-   ik;pe:=0;running:=1;mi:=0;gp:=0;fp:=0;col:=0;el:=0;dl:=-1;ds:=0;apsp:=0;
+   ik;pe:=0;running:=1;mi:=0;gp:=0;fp:=0;col:=0;el:=0;dl:=-1;ds:=0;apsp:=0;ctl:=-1;
    ep:=0;while ep<26 do begin vars[ep]:=0;abase[ep]:=-1;asize[ep]:=0;ep:=ep+1 end;
    write('COR24 BASIC V1');pn;write('READY');pn;
    tl:=0;

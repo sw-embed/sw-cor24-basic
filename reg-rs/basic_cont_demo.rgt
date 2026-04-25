@@ -1,0 +1,4 @@
+command = "./scripts/demo-cont.sh"
+timeout = 30
+exit_code = 0
+desc = "CONT after STOP demo"

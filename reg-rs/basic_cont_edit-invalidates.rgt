@@ -1,0 +1,4 @@
+command = "./scripts/run-basic.sh tests/cont/edit-invalidates.bas"
+timeout = 30
+exit_code = 0
+desc = "CONT after STOP: edit-invalidates"

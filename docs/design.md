@@ -60,6 +60,7 @@ Steps:
 | 0xA1 | BXOR |
 | 0xA2 | SHL |
 | 0xA3 | SHR |
+| 0xA4 | CONT |
 
 Keywords are case-insensitive. The tokenizer uppercases input before
 matching.
@@ -229,10 +230,21 @@ and may call the expression parser.
 6. Error if no match: `NEXT WITHOUT FOR`
 
 **STOP**
-1. Set `stopped_flag`
-2. Print `STOPPED AT LINE nnn`
-3. Return to REPL
-(CONT to resume after STOP is documented for v2, not implemented in v1)
+1. Print `STOPPED IN nnn`
+2. Save the resume pointer (the next-line offset) so a subsequent
+   `CONT` can pick up here.
+3. Return to REPL.
+
+**CONT**
+1. If a resume pointer is saved (i.e. the most recent execution
+   ended via STOP and the program has not been edited since),
+   resume execution from the saved pointer; clear the pointer
+   so a second CONT errors.
+2. Otherwise raise `CAN'T CONTINUE` (code 16).
+3. Variables, GOSUB stack, and FOR stack are preserved across
+   STOP — only RUN and NEW reset them.
+4. Editing any line (or RUN, or NEW) clears the saved resume
+   pointer.
 
 **END**
 1. Clear running flag
@@ -382,6 +394,7 @@ Each error has a numeric code for debugger use:
 | 13 | OUT OF DATA | READ with no remaining DATA values |
 | 14 | END OF TAPE | Reader/punch exhausted |
 | 15 | DEVICE ERROR | I/O failure |
+| 16 | CAN'T CONTINUE | CONT with no valid resume point |
 
 ### 7.3 Error Recovery
 
