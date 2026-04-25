@@ -29,7 +29,11 @@ SPC_OUTPUT=$("$EMU" --load-binary "$P24P_BIN@0" --entry 0 --stack-kilobytes 8 \
   -u "$(cat "$REPO_DIR/src/basic.pas")"$'\x04' \
   --speed 0 -n 2000000000 2>&1 | grep -v '^\[UART')
 
-if ! echo "$SPC_OUTPUT" | grep -q "; OK"; then
+# Use a native bash glob match instead of `echo $SPC_OUTPUT | grep -q`:
+# the piped form races on SIGPIPE (grep -q exits on first match, echo is
+# killed mid-write, pipefail then trips and we wrongly print "Compilation
+# failed"). The race fires more often as the .spc output grows.
+if [[ "$SPC_OUTPUT" != *"; OK"* ]]; then
   echo "Compilation failed:" >&2
   echo "$SPC_OUTPUT" | grep "error" >&2
   exit 1
