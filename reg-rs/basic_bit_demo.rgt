@@ -1,0 +1,4 @@
+command = "./scripts/demo-bitwise.sh"
+timeout = 30
+exit_code = 0
+desc = "Bitwise BAND/BOR/BXOR/SHL/SHR demo"

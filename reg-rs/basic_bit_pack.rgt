@@ -1,0 +1,4 @@
+command = "./scripts/run-basic.sh tests/bitwise/pack.bas"
+timeout = 30
+exit_code = 0
+desc = "Bitwise: pack"

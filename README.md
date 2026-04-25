@@ -36,7 +36,8 @@ p-code VM as a language layer:
   ON...GOTO/GOSUB
 - Commands: LIST, RUN, NEW, BYE (or Ctrl-D / Ctrl-] at prompt)
 - Functions: PEEK, POKE, ABS, CHR$ (PRINT only)
-- Logical operators: AND, OR (below comparison in precedence)
+- Logical operators: AND, OR (lowest precedence)
+- Bitwise operators: BAND, BOR, BXOR, SHL, SHR (above comparison)
 - Arithmetic: +, -, *, /, MOD (MOD shares precedence with * and /;
   truncating semantics — A MOD B = A - (A/B)*B)
 - Variables: A-Z (26 scalar integers); DIM A(n) declares a separate
@@ -150,6 +151,7 @@ for the full gallery.
 ./scripts/demo-dim.sh
 ./scripts/demo-on.sh
 ./scripts/demo-mod.sh
+./scripts/demo-bitwise.sh
 ```
 
 ## Dependencies

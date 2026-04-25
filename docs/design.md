@@ -55,6 +55,11 @@ Steps:
 | 0x9C | DIM |
 | 0x9D | ON |
 | 0x9E | MOD |
+| 0x9F | BAND |
+| 0xA0 | BOR |
+| 0xA1 | BXOR |
+| 0xA2 | SHL |
+| 0xA3 | SHR |
 
 Keywords are case-insensitive. The tokenizer uppercases input before
 matching.
@@ -125,10 +130,12 @@ The expression parser uses precedence climbing, which naturally handles:
 
 | Precedence | Operators | Associativity |
 |-----------|-----------|---------------|
-| 1 (lowest) | `=`, `<>`, `<`, `<=`, `>`, `>=` | Left |
-| 2 | `+`, `-` | Left |
-| 3 | `*`, `/`, `MOD` | Left |
-| 4 (highest) | unary `-`, unary `+` | Right (prefix) |
+| 1 (lowest) | `AND`, `OR` (logical) | Left |
+| 2 | `BAND`, `BOR`, `BXOR`, `SHL`, `SHR` (bitwise) | Left |
+| 3 | `=`, `<>`, `<`, `<=`, `>`, `>=` | Left |
+| 4 | `+`, `-` | Left |
+| 5 | `*`, `/`, `MOD` | Left |
+| 6 (highest) | unary `-`, unary `+` | Right (prefix) |
 
 ### 2.3 Expression Grammar
 

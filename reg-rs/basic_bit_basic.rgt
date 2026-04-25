@@ -1,0 +1,4 @@
+command = "./scripts/run-basic.sh tests/bitwise/basic.bas"
+timeout = 30
+exit_code = 0
+desc = "Bitwise: basic"
