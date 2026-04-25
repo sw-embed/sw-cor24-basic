@@ -1,0 +1,4 @@
+command = "./scripts/demo-mod.sh"
+timeout = 30
+exit_code = 0
+desc = "MOD operator demo (FizzBuzz)"

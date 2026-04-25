@@ -1,8 +1,8 @@
 program Basic;
 const
-   FK=128;TP=160;TG=169;VA=192;TI=224;TS=225;KW=8;NK=30;PS=16384;AS=1024;
+   FK=128;TP=160;TG=169;VA=192;TI=224;TS=225;KW=8;NK=31;PS=16384;AS=1024;
 var
-   kt:array[0..239]of char;
+   kt:array[0..247]of char;
    lb:array[0..79]of char;
    ll,lp:integer;
    tb:array[0..127]of integer;
@@ -43,7 +43,7 @@ begin
    ks(24,'C','H','R','$',' ',' ',' ',' ');
    ks(25,'D','A','T','A',' ',' ',' ',' ');ks(26,'R','E','A','D',' ',' ',' ',' ');
    ks(27,'R','E','S','T','O','R','E',' ');ks(28,'D','I','M',' ',' ',' ',' ',' ');
-   ks(29,'O','N',' ',' ',' ',' ',' ',' ')
+   ks(29,'O','N',' ',' ',' ',' ',' ',' ');ks(30,'M','O','D',' ',' ',' ',' ',' ')
 end;
 function kl(i:integer):integer;
 var p,n:integer;
@@ -143,9 +143,12 @@ else if lev=1 then begin
 else if tb[ep]=TP then begin ep:=ep+1;p_expr(1) end
 else p_expr(0) end
 else if lev=2 then begin p_expr(1);v:=ev;
-   while(err=0)and((tb[ep]=TP+2)or(tb[ep]=TP+3))do begin
+   while(err=0)and((tb[ep]=TP+2)or(tb[ep]=TP+3)or(tb[ep]=FK+30))do begin
       op:=tb[ep];ep:=ep+1;p_expr(1);r:=ev;
-      if op=TP+2 then v:=v*r else if r<>0 then v:=v div r else err:=5 end;ev:=v end
+      if op=TP+2 then v:=v*r
+      else if r=0 then err:=5
+      else if op=TP+3 then v:=v div r
+      else v:=v-(v div r)*r end;ev:=v end
 else if lev=3 then begin p_expr(2);v:=ev;
    while(err=0)and((tb[ep]=TP)or(tb[ep]=TP+1))do begin
       op:=tb[ep];ep:=ep+1;p_expr(2);r:=ev;

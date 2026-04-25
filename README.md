@@ -37,6 +37,8 @@ p-code VM as a language layer:
 - Commands: LIST, RUN, NEW, BYE (or Ctrl-D / Ctrl-] at prompt)
 - Functions: PEEK, POKE, ABS, CHR$ (PRINT only)
 - Logical operators: AND, OR (below comparison in precedence)
+- Arithmetic: +, -, *, /, MOD (MOD shares precedence with * and /;
+  truncating semantics — A MOD B = A - (A/B)*B)
 - Variables: A-Z (26 scalar integers); DIM A(n) declares a separate
   integer array sharing the letter (scalar A and array A() are distinct)
 
@@ -147,6 +149,7 @@ for the full gallery.
 ./scripts/demo-data.sh
 ./scripts/demo-dim.sh
 ./scripts/demo-on.sh
+./scripts/demo-mod.sh
 ```
 
 ## Dependencies

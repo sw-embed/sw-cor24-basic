@@ -54,6 +54,7 @@ Steps:
 | 0x9B | RESTORE |
 | 0x9C | DIM |
 | 0x9D | ON |
+| 0x9E | MOD |
 
 Keywords are case-insensitive. The tokenizer uppercases input before
 matching.
@@ -126,7 +127,7 @@ The expression parser uses precedence climbing, which naturally handles:
 |-----------|-----------|---------------|
 | 1 (lowest) | `=`, `<>`, `<`, `<=`, `>`, `>=` | Left |
 | 2 | `+`, `-` | Left |
-| 3 | `*`, `/` | Left |
+| 3 | `*`, `/`, `MOD` | Left |
 | 4 (highest) | unary `-`, unary `+` | Right (prefix) |
 
 ### 2.3 Expression Grammar
@@ -135,7 +136,7 @@ The expression parser uses precedence climbing, which naturally handles:
 expr        = comparison
 comparison  = addition ( ( "=" | "<>" | "<" | "<=" | ">" | ">=" ) addition )*
 addition    = term ( ( "+" | "-" ) term )*
-term        = unary ( ( "*" | "/" ) unary )*
+term        = unary ( ( "*" | "/" | "MOD" ) unary )*
 unary       = ( "-" | "+" ) unary | primary
 primary     = INTEGER
             | VARIABLE
