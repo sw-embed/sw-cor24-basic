@@ -53,6 +53,7 @@ Steps:
 | 0x9A | READ |
 | 0x9B | RESTORE |
 | 0x9C | DIM |
+| 0x9D | ON |
 
 Keywords are case-insensitive. The tokenizer uppercases input before
 matching.
@@ -265,6 +266,16 @@ and may call the expression parser.
 1. `<var>(<expr>)` reads or writes the array element at index `expr`.
 2. Bounds check: 0 <= index < size; otherwise `BAD ADDRESS` (code 8).
 3. Reading or writing an un-DIMmed array also raises `BAD ADDRESS`.
+
+**ON <expr> GOTO <line>[, <line>]...** / **ON <expr> GOSUB <line>[, <line>]...**
+1. Evaluate `<expr>` as a 1-based index into the comma-separated
+   line list.
+2. If the index is in range, branch to the selected line; for
+   GOSUB, push the return pointer first (mirroring plain GOSUB).
+3. If the index is `<= 0` or greater than the number of targets,
+   fall through to the next line (no error). This matches MS/Dartmouth
+   BASIC behaviour.
+4. `BAD LINE NUMBER` (code 3) if the selected line doesn't exist.
 
 ## 4. Variable Model
 

@@ -1,0 +1,4 @@
+command = "./scripts/demo-on.sh"
+timeout = 30
+exit_code = 0
+desc = "ON ... GOSUB end-to-end demo"

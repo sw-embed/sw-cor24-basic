@@ -1,8 +1,8 @@
 program Basic;
 const
-   FK=128;TP=160;TG=169;VA=192;TI=224;TS=225;KW=8;NK=29;PS=16384;AS=1024;
+   FK=128;TP=160;TG=169;VA=192;TI=224;TS=225;KW=8;NK=30;PS=16384;AS=1024;
 var
-   kt:array[0..231]of char;
+   kt:array[0..239]of char;
    lb:array[0..79]of char;
    ll,lp:integer;
    tb:array[0..127]of integer;
@@ -42,7 +42,8 @@ begin
    ks(22,'P','O','K','E',' ',' ',' ',' ');ks(23,'A','B','S',' ',' ',' ',' ',' ');
    ks(24,'C','H','R','$',' ',' ',' ',' ');
    ks(25,'D','A','T','A',' ',' ',' ',' ');ks(26,'R','E','A','D',' ',' ',' ',' ');
-   ks(27,'R','E','S','T','O','R','E',' ');ks(28,'D','I','M',' ',' ',' ',' ',' ')
+   ks(27,'R','E','S','T','O','R','E',' ');ks(28,'D','I','M',' ',' ',' ',' ',' ');
+   ks(29,'O','N',' ',' ',' ',' ',' ',' ')
 end;
 function kl(i:integer):integer;
 var p,n:integer;
@@ -301,6 +302,28 @@ begin done:=false;if dl<0 then begin dl:=0;ds:=0 end;
 	    ln:=ord(pg[dl+1])*65536+ord(pg[dl+2])*256+ord(pg[dl+3]);
 	    vars[vi]:=sgn*ln;dl:=dl+4;done:=true
 	 end else err:=1 end end end end;
+procedure do_on;
+var idx,n,lnum,which:integer;done,matched:boolean;
+begin p_expr(5);idx:=ev;which:=-1;
+   if err=0 then begin
+      if tb[ep]=FK+5 then which:=0
+      else if tb[ep]=FK+6 then which:=1
+      else err:=1;
+      if err=0 then begin ep:=ep+1;
+	 n:=1;done:=false;matched:=false;lnum:=0;
+	 while(err=0)and(not done)do begin
+	    p_expr(5);
+	    if err=0 then begin
+	       if n=idx then begin lnum:=ev;matched:=true end;
+	       if tb[ep]=178 then begin ep:=ep+1;n:=n+1 end
+	       else done:=true end end;
+	 if(err=0)and matched then begin
+	    if which=1 then begin
+	       if gp>=64 then err:=6
+	       else begin gs[gp]:=tl;gp:=gp+1 end end;
+	    if err=0 then begin
+	       lp:=store_find(lnum);
+	       if lp<0 then err:=3 else tl:=lp end end end end end;
 procedure dispatch;
 var t,rd,vi,n,i:integer;
 begin ep:=0;err:=0;rd:=1;
@@ -360,6 +383,7 @@ begin ep:=0;err:=0;rd:=1;
 	 if err=0 then begin n:=store_find(ev);
 	    if n<0 then err:=3 else begin dl:=n;ds:=0 end end end end
    else if t=FK+28 then begin ep:=ep+1;do_dim end
+   else if t=FK+29 then begin ep:=ep+1;do_on end
    else if t=FK+22 then begin ep:=ep+1;p_expr(5);
       if err=0 then begin n:=ev;
 	 if tb[ep]=178 then begin ep:=ep+1;p_expr(5);
