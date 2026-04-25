@@ -48,6 +48,19 @@ Steps:
 | 0x95 | PEEK |
 | 0x96 | POKE |
 | 0x97 | ABS |
+| 0x98 | CHR$ |
+| 0x99 | DATA |
+| 0x9A | READ |
+| 0x9B | RESTORE |
+| 0x9C | DIM |
+| 0x9D | ON |
+| 0x9E | MOD |
+| 0x9F | BAND |
+| 0xA0 | BOR |
+| 0xA1 | BXOR |
+| 0xA2 | SHL |
+| 0xA3 | SHR |
+| 0xA4 | CONT |
 
 Keywords are case-insensitive. The tokenizer uppercases input before
 matching.
@@ -118,10 +131,12 @@ The expression parser uses precedence climbing, which naturally handles:
 
 | Precedence | Operators | Associativity |
 |-----------|-----------|---------------|
-| 1 (lowest) | `=`, `<>`, `<`, `<=`, `>`, `>=` | Left |
-| 2 | `+`, `-` | Left |
-| 3 | `*`, `/` | Left |
-| 4 (highest) | unary `-`, unary `+` | Right (prefix) |
+| 1 (lowest) | `AND`, `OR` (logical) | Left |
+| 2 | `BAND`, `BOR`, `BXOR`, `SHL`, `SHR` (bitwise) | Left |
+| 3 | `=`, `<>`, `<`, `<=`, `>`, `>=` | Left |
+| 4 | `+`, `-` | Left |
+| 5 | `*`, `/`, `MOD` | Left |
+| 6 (highest) | unary `-`, unary `+` | Right (prefix) |
 
 ### 2.3 Expression Grammar
 
@@ -129,7 +144,7 @@ The expression parser uses precedence climbing, which naturally handles:
 expr        = comparison
 comparison  = addition ( ( "=" | "<>" | "<" | "<=" | ">" | ">=" ) addition )*
 addition    = term ( ( "+" | "-" ) term )*
-term        = unary ( ( "*" | "/" ) unary )*
+term        = unary ( ( "*" | "/" | "MOD" ) unary )*
 unary       = ( "-" | "+" ) unary | primary
 primary     = INTEGER
             | VARIABLE
@@ -215,10 +230,21 @@ and may call the expression parser.
 6. Error if no match: `NEXT WITHOUT FOR`
 
 **STOP**
-1. Set `stopped_flag`
-2. Print `STOPPED AT LINE nnn`
-3. Return to REPL
-(CONT to resume after STOP is documented for v2, not implemented in v1)
+1. Print `STOPPED IN nnn`
+2. Save the resume pointer (the next-line offset) so a subsequent
+   `CONT` can pick up here.
+3. Return to REPL.
+
+**CONT**
+1. If a resume pointer is saved (i.e. the most recent execution
+   ended via STOP and the program has not been edited since),
+   resume execution from the saved pointer; clear the pointer
+   so a second CONT errors.
+2. Otherwise raise `CAN'T CONTINUE` (code 16).
+3. Variables, GOSUB stack, and FOR stack are preserved across
+   STOP — only RUN and NEW reset them.
+4. Editing any line (or RUN, or NEW) clears the saved resume
+   pointer.
 
 **END**
 1. Clear running flag
@@ -226,6 +252,50 @@ and may call the expression parser.
 
 **REM**
 1. Skip rest of line (already stored as string token)
+
+**DATA <expr> [, <expr>]...**
+1. No-op at execution time. The data values stay embedded in the
+   stored line and are consumed by READ.
+
+**READ <var> [, <var>]...**
+1. For each target: read one signed integer from the data pool,
+   advance the read pointer, store in variable.
+2. The data pool is the concatenation of every DATA line's values
+   in line-number order. The read pointer survives across statements
+   until reset by RESTORE or RUN.
+3. Out-of-data raises `OUT OF DATA` (code 13).
+
+**RESTORE [line]**
+1. With no argument: rewind the read pointer; the next READ scans
+   from the first DATA line.
+2. With a line number: position the read pointer at that line; the
+   next READ scans forward from there for DATA values.
+3. RUN and NEW also rewind the read pointer.
+
+**DIM <name>(<size>) [, <name>(<size>)]...**
+1. For each declaration: allocate `size+1` integer slots from a
+   shared 1024-element array pool, store the base offset and length
+   per letter, and zero-fill the new slots.
+2. Re-DIM allocates fresh from the pool (old slots leak); the new
+   array starts zero-cleared.
+3. Single-letter names A..Z; the array namespace is distinct from
+   the scalar namespace (`A` and `A()` coexist).
+4. `OUT OF MEMORY` (code 4) if the pool can't fit the new array.
+
+**Subscripted variable references** (in expressions and LET targets)
+1. `<var>(<expr>)` reads or writes the array element at index `expr`.
+2. Bounds check: 0 <= index < size; otherwise `BAD ADDRESS` (code 8).
+3. Reading or writing an un-DIMmed array also raises `BAD ADDRESS`.
+
+**ON <expr> GOTO <line>[, <line>]...** / **ON <expr> GOSUB <line>[, <line>]...**
+1. Evaluate `<expr>` as a 1-based index into the comma-separated
+   line list.
+2. If the index is in range, branch to the selected line; for
+   GOSUB, push the return pointer first (mirroring plain GOSUB).
+3. If the index is `<= 0` or greater than the number of targets,
+   fall through to the next line (no error). This matches MS/Dartmouth
+   BASIC behaviour.
+4. `BAD LINE NUMBER` (code 3) if the selected line doesn't exist.
 
 ## 4. Variable Model
 
@@ -321,9 +391,10 @@ Each error has a numeric code for debugger use:
 | 10 | TYPE MISMATCH | Wrong value type |
 | 11 | OVERFLOW | Arithmetic overflow (if checked) |
 | 12 | STRING TOO LONG | String exceeds buffer |
-| 13 | OUT OF DATA | DATA exhausted (future) |
+| 13 | OUT OF DATA | READ with no remaining DATA values |
 | 14 | END OF TAPE | Reader/punch exhausted |
 | 15 | DEVICE ERROR | I/O failure |
+| 16 | CAN'T CONTINUE | CONT with no valid resume point |
 
 ### 7.3 Error Recovery
 

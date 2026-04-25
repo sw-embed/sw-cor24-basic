@@ -32,11 +32,16 @@ p-code VM as a language layer:
 - Interactive: immediate mode + stored program mode (RUN)
 - Terminal/teletype oriented
 - Statements: LET, PRINT, INPUT, IF...THEN, GOTO, GOSUB, RETURN,
-  FOR...TO...STEP, NEXT, STOP, END, REM
+  FOR...TO...STEP, NEXT, STOP, END, REM, CONT, DATA, READ, RESTORE, DIM,
+  ON...GOTO/GOSUB
 - Commands: LIST, RUN, NEW, BYE (or Ctrl-D / Ctrl-] at prompt)
 - Functions: PEEK, POKE, ABS, CHR$ (PRINT only)
-- Logical operators: AND, OR (below comparison in precedence)
-- Variables: A-Z (26 scalar integers)
+- Logical operators: AND, OR (lowest precedence)
+- Bitwise operators: BAND, BOR, BXOR, SHL, SHR (above comparison)
+- Arithmetic: +, -, *, /, MOD (MOD shares precedence with * and /;
+  truncating semantics — A MOD B = A - (A/B)*B)
+- Variables: A-Z (26 scalar integers); DIM A(n) declares a separate
+  integer array sharing the letter (scalar A and array A() are distinct)
 
 ## Positioning
 
@@ -142,6 +147,12 @@ for the full gallery.
 ./scripts/demo-startrek.sh
 ./scripts/demo-trek-adventure.sh
 ./scripts/demo-robot-chase.sh
+./scripts/demo-data.sh
+./scripts/demo-dim.sh
+./scripts/demo-on.sh
+./scripts/demo-mod.sh
+./scripts/demo-bitwise.sh
+./scripts/demo-cont.sh
 ```
 
 ## Dependencies

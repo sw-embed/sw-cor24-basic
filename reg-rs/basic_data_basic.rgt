@@ -1,0 +1,4 @@
+command = "./scripts/run-basic.sh tests/data/basic.bas"
+timeout = 30
+exit_code = 0
+desc = "DATA/READ: sequential reads in FOR loop"

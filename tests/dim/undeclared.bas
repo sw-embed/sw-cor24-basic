@@ -1,0 +1,4 @@
+10 LET X = Z(0)
+20 PRINT X
+RUN
+BYE

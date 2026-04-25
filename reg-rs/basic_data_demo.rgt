@@ -1,0 +1,4 @@
+command = "./scripts/demo-data.sh"
+timeout = 30
+exit_code = 0
+desc = "DATA/READ/RESTORE end-to-end demo"

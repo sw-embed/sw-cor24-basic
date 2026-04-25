@@ -1,0 +1,4 @@
+command = "./scripts/run-basic.sh tests/on/badline.bas"
+timeout = 30
+exit_code = 0
+desc = "ON ... GOTO/GOSUB: badline"
