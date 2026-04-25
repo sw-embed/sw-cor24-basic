@@ -1,0 +1,4 @@
+command = "./scripts/run-basic.sh tests/data/outof.bas"
+timeout = 30
+exit_code = 0
+desc = "DATA/READ: OUT OF DATA error code 13"

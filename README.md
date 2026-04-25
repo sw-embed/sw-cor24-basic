@@ -32,7 +32,7 @@ p-code VM as a language layer:
 - Interactive: immediate mode + stored program mode (RUN)
 - Terminal/teletype oriented
 - Statements: LET, PRINT, INPUT, IF...THEN, GOTO, GOSUB, RETURN,
-  FOR...TO...STEP, NEXT, STOP, END, REM
+  FOR...TO...STEP, NEXT, STOP, END, REM, DATA, READ, RESTORE
 - Commands: LIST, RUN, NEW, BYE (or Ctrl-D / Ctrl-] at prompt)
 - Functions: PEEK, POKE, ABS, CHR$ (PRINT only)
 - Logical operators: AND, OR (below comparison in precedence)
@@ -142,6 +142,7 @@ for the full gallery.
 ./scripts/demo-startrek.sh
 ./scripts/demo-trek-adventure.sh
 ./scripts/demo-robot-chase.sh
+./scripts/demo-data.sh
 ```
 
 ## Dependencies

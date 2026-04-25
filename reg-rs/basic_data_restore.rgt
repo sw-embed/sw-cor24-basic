@@ -1,0 +1,4 @@
+command = "./scripts/run-basic.sh tests/data/restore.bas"
+timeout = 30
+exit_code = 0
+desc = "DATA/READ: RESTORE rewinds; RESTORE n jumps to a line"

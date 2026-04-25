@@ -48,6 +48,10 @@ Steps:
 | 0x95 | PEEK |
 | 0x96 | POKE |
 | 0x97 | ABS |
+| 0x98 | CHR$ |
+| 0x99 | DATA |
+| 0x9A | READ |
+| 0x9B | RESTORE |
 
 Keywords are case-insensitive. The tokenizer uppercases input before
 matching.
@@ -227,6 +231,25 @@ and may call the expression parser.
 **REM**
 1. Skip rest of line (already stored as string token)
 
+**DATA <expr> [, <expr>]...**
+1. No-op at execution time. The data values stay embedded in the
+   stored line and are consumed by READ.
+
+**READ <var> [, <var>]...**
+1. For each target: read one signed integer from the data pool,
+   advance the read pointer, store in variable.
+2. The data pool is the concatenation of every DATA line's values
+   in line-number order. The read pointer survives across statements
+   until reset by RESTORE or RUN.
+3. Out-of-data raises `OUT OF DATA` (code 13).
+
+**RESTORE [line]**
+1. With no argument: rewind the read pointer; the next READ scans
+   from the first DATA line.
+2. With a line number: position the read pointer at that line; the
+   next READ scans forward from there for DATA values.
+3. RUN and NEW also rewind the read pointer.
+
 ## 4. Variable Model
 
 ### 4.1 Minimal (26 variables)
@@ -321,7 +344,7 @@ Each error has a numeric code for debugger use:
 | 10 | TYPE MISMATCH | Wrong value type |
 | 11 | OVERFLOW | Arithmetic overflow (if checked) |
 | 12 | STRING TOO LONG | String exceeds buffer |
-| 13 | OUT OF DATA | DATA exhausted (future) |
+| 13 | OUT OF DATA | READ with no remaining DATA values |
 | 14 | END OF TAPE | Reader/punch exhausted |
 | 15 | DEVICE ERROR | I/O failure |
 

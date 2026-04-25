@@ -1,8 +1,8 @@
 program Basic;
 const
-   FK=128;TP=160;TG=169;VA=192;TI=224;TS=225;KW=6;NK=25;PS=16384;
+   FK=128;TP=160;TG=169;VA=192;TI=224;TS=225;KW=8;NK=28;PS=16384;
 var
-   kt:array[0..149]of char;
+   kt:array[0..223]of char;
    lb:array[0..79]of char;
    ll,lp:integer;
    tb:array[0..127]of integer;
@@ -18,26 +18,28 @@ var
    fl:array[0..15]of integer;
    fs:array[0..15]of integer;
    fr:array[0..15]of integer;
-   gp,fp,col,pok,el,running,mi:integer;
-procedure ks(i:integer;a,b,c,d,e,f:char);
+   gp,fp,col,pok,el,running,mi,dl,ds:integer;
+procedure ks(i:integer;a,b,c,d,e,f,g,h:char);
 var p:integer;
-begin p:=i*KW;kt[p]:=a;kt[p+1]:=b;kt[p+2]:=c;kt[p+3]:=d;kt[p+4]:=e;kt[p+5]:=f end;
+begin p:=i*KW;kt[p]:=a;kt[p+1]:=b;kt[p+2]:=c;kt[p+3]:=d;kt[p+4]:=e;kt[p+5]:=f;kt[p+6]:=g;kt[p+7]:=h end;
 procedure ik;
 begin
-   ks(0,'L','E','T',' ',' ',' ');ks(1,'P','R','I','N','T',' ');
-   ks(2,'I','N','P','U','T',' ');
-   ks(3,'I','F',' ',' ',' ',' ');ks(4,'T','H','E','N',' ',' ');
-   ks(5,'G','O','T','O',' ',' ');ks(6,'G','O','S','U','B',' ');
-   ks(7,'R','E','T','U','R','N');ks(8,'F','O','R',' ',' ',' ');
-   ks(9,'T','O',' ',' ',' ',' ');ks(10,'S','T','E','P',' ',' ');
-   ks(11,'N','E','X','T',' ',' ');ks(12,'S','T','O','P',' ',' ');
-   ks(13,'E','N','D',' ',' ',' ');ks(14,'R','E','M',' ',' ',' ');
-   ks(15,'L','I','S','T',' ',' ');ks(16,'R','U','N',' ',' ',' ');
-   ks(17,'N','E','W',' ',' ',' ');
-   ks(18,'A','N','D',' ',' ',' ');ks(19,'O','R',' ',' ',' ',' ');
-   ks(20,'B','Y','E',' ',' ',' ');ks(21,'P','E','E','K',' ',' ');
-   ks(22,'P','O','K','E',' ',' ');ks(23,'A','B','S',' ',' ',' ');
-   ks(24,'C','H','R','$',' ',' ')
+   ks(0,'L','E','T',' ',' ',' ',' ',' ');ks(1,'P','R','I','N','T',' ',' ',' ');
+   ks(2,'I','N','P','U','T',' ',' ',' ');
+   ks(3,'I','F',' ',' ',' ',' ',' ',' ');ks(4,'T','H','E','N',' ',' ',' ',' ');
+   ks(5,'G','O','T','O',' ',' ',' ',' ');ks(6,'G','O','S','U','B',' ',' ',' ');
+   ks(7,'R','E','T','U','R','N',' ',' ');ks(8,'F','O','R',' ',' ',' ',' ',' ');
+   ks(9,'T','O',' ',' ',' ',' ',' ',' ');ks(10,'S','T','E','P',' ',' ',' ',' ');
+   ks(11,'N','E','X','T',' ',' ',' ',' ');ks(12,'S','T','O','P',' ',' ',' ',' ');
+   ks(13,'E','N','D',' ',' ',' ',' ',' ');ks(14,'R','E','M',' ',' ',' ',' ',' ');
+   ks(15,'L','I','S','T',' ',' ',' ',' ');ks(16,'R','U','N',' ',' ',' ',' ',' ');
+   ks(17,'N','E','W',' ',' ',' ',' ',' ');
+   ks(18,'A','N','D',' ',' ',' ',' ',' ');ks(19,'O','R',' ',' ',' ',' ',' ',' ');
+   ks(20,'B','Y','E',' ',' ',' ',' ',' ');ks(21,'P','E','E','K',' ',' ',' ',' ');
+   ks(22,'P','O','K','E',' ',' ',' ',' ');ks(23,'A','B','S',' ',' ',' ',' ',' ');
+   ks(24,'C','H','R','$',' ',' ',' ',' ');
+   ks(25,'D','A','T','A',' ',' ',' ',' ');ks(26,'R','E','A','D',' ',' ',' ',' ');
+   ks(27,'R','E','S','T','O','R','E',' ')
 end;
 function kl(i:integer):integer;
 var p,n:integer;
@@ -247,6 +249,25 @@ begin p:=0;
       else if tk=TG then begin pc('>');pc('=');j:=j+1;lc:=0 end
       else j:=j+1
       end;pn;p:=p+3+n end end;
+procedure data_read(vi:integer);
+var b,sgn,ln:integer;done:boolean;
+begin done:=false;if dl<0 then begin dl:=0;ds:=0 end;
+   while(err=0)and(not done)do begin
+      if ds=0 then begin
+	 while(dl<pe)and(ds=0)do begin
+	    if ord(pg[dl+3])=FK+25 then begin dl:=dl+4;ds:=1 end
+	    else dl:=dl+3+ord(pg[dl+2]) end;
+	 if ds=0 then err:=13
+      end else begin b:=ord(pg[dl]);
+	 if b=0 then begin dl:=dl+1;ds:=0 end
+      else if b=178 then dl:=dl+1
+      else begin sgn:=1;
+	 if b=TP+1 then begin sgn:=-1;dl:=dl+1;b:=ord(pg[dl]) end
+	 else if b=TP then begin dl:=dl+1;b:=ord(pg[dl]) end;
+	 if b=TI then begin
+	    ln:=ord(pg[dl+1])*65536+ord(pg[dl+2])*256+ord(pg[dl+3]);
+	    vars[vi]:=sgn*ln;dl:=dl+4;done:=true
+	 end else err:=1 end end end end;
 procedure dispatch;
 var t,rd,vi,n,i:integer;
 begin ep:=0;err:=0;rd:=1;
@@ -287,10 +308,22 @@ begin ep:=0;err:=0;rd:=1;
 	 then tl:=fr[vi] else fp:=fp-1 end
    else if(t=FK+12)or(t=FK+13)then mi:=0
    else if t=FK+14 then begin end
-   else if t=FK+16 then begin mi:=1;tl:=0;gp:=0;fp:=0 end
+   else if t=FK+16 then begin mi:=1;tl:=0;gp:=0;fp:=0;dl:=-1;ds:=0 end
    else if t=FK+15 then do_list
-   else if t=FK+17 then pe:=0
+   else if t=FK+17 then begin pe:=0;dl:=-1;ds:=0 end
    else if t=FK+20 then running:=0
+   else if t=FK+25 then begin end
+   else if t=FK+26 then begin ep:=ep+1;
+      if(tb[ep]>=VA)and(tb[ep]<=VA+25)then begin vi:=tb[ep]-VA;ep:=ep+1;data_read(vi);
+	 while(err=0)and(tb[ep]=178)do begin ep:=ep+1;
+	    if(tb[ep]>=VA)and(tb[ep]<=VA+25)then begin vi:=tb[ep]-VA;ep:=ep+1;data_read(vi) end
+	    else err:=1 end
+      end else err:=1 end
+   else if t=FK+27 then begin ep:=ep+1;
+      if tb[ep]=0 then begin dl:=-1;ds:=0 end
+      else begin p_expr(5);
+	 if err=0 then begin n:=store_find(ev);
+	    if n<0 then err:=3 else begin dl:=n;ds:=0 end end end end
    else if t=FK+22 then begin ep:=ep+1;p_expr(5);
       if err=0 then begin n:=ev;
 	 if tb[ep]=178 then begin ep:=ep+1;p_expr(5);
@@ -302,7 +335,7 @@ begin ep:=0;err:=0;rd:=1;
    if err<>0 then begin write('?ERR ');print_int(err);
       if el>0 then begin write(' IN ');print_int(el) end;pn end end;
 begin
-   ik;pe:=0;running:=1;mi:=0;gp:=0;fp:=0;col:=0;el:=0;ep:=0;while ep<26 do begin vars[ep]:=0;ep:=ep+1 end;
+   ik;pe:=0;running:=1;mi:=0;gp:=0;fp:=0;col:=0;el:=0;dl:=-1;ds:=0;ep:=0;while ep<26 do begin vars[ep]:=0;ep:=ep+1 end;
    write('COR24 BASIC V1');pn;write('READY');pn;
    tl:=0;
    while running=1 do begin
