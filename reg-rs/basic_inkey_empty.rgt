@@ -1,0 +1,4 @@
+command = "./tests/inkey/empty.sh"
+timeout = 30
+exit_code = 0
+desc = "INKEY: empty buffer returns -1"

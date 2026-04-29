@@ -35,7 +35,7 @@ p-code VM as a language layer:
   FOR...TO...STEP, NEXT, STOP, END, REM, CONT, DATA, READ, RESTORE, DIM,
   ON...GOTO/GOSUB
 - Commands: LIST, RUN, NEW, BYE (or Ctrl-D / Ctrl-] at prompt)
-- Functions: PEEK, POKE, ABS, CHR$ (PRINT only)
+- Functions: PEEK, POKE, ABS, INKEY, CHR$ (PRINT only)
 - Logical operators: AND, OR (lowest precedence)
 - Bitwise operators: BAND, BOR, BXOR, SHL, SHR (above comparison)
 - Arithmetic: +, -, *, /, MOD (MOD shares precedence with * and /;
@@ -81,6 +81,14 @@ Known limitations:
 ```sh
 ./scripts/build-basic.sh        # compile src/basic.pas to build/basic.p24
 ./scripts/run-basic.sh examples/hello.bas
+```
+
+For scripted callers that need only program output, suppress the initial
+banner and `READY` line with either form:
+
+```sh
+./scripts/run-basic.sh --quiet examples/hello.bas
+BASIC_QUIET=1 ./scripts/run-basic.sh examples/hello.bas
 ```
 
 ## Star Trek demo

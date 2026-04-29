@@ -1,8 +1,11 @@
 program Basic;
 const
-   FK=128;TP=164;TG=173;VA=192;TI=224;TS=225;KW=8;NK=37;PS=16384;AS=1024;
+   { Token layout: keywords use 128..175, leaving room for 48 keywords.
+     Delimiters stay at 176..179, operators use 180..189, and variables
+     start at 192. Keep future keyword additions below 176. }
+   FK=128;TP=180;TG=189;VA=192;TI=224;TS=225;KW=8;NK=38;PS=16384;AS=1024;
 var
-   kt:array[0..295]of char;
+   kt:array[0..303]of char;
    lb:array[0..79]of char;
    ll,lp:integer;
    tb:array[0..127]of integer;
@@ -47,7 +50,8 @@ begin
    ks(31,'B','A','N','D',' ',' ',' ',' ');ks(32,'B','O','R',' ',' ',' ',' ',' ');
    ks(33,'B','X','O','R',' ',' ',' ',' ');ks(34,'S','H','L',' ',' ',' ',' ',' ');
    ks(35,'S','H','R',' ',' ',' ',' ',' ');
-   ks(36,'C','O','N','T',' ',' ',' ',' ')
+   ks(36,'C','O','N','T',' ',' ',' ',' ');
+   ks(37,'I','N','K','E','Y',' ',' ',' ')
 end;
 function kl(i:integer):integer;
 var p,n:integer;
@@ -152,6 +156,7 @@ begin
 	 if v<0 then v:=0-v;
 	 if(err=0)and(tb[ep]=177)then ep:=ep+1 else if err=0 then err:=1
       end else err:=1 end
+   else if tb[ep]=FK+37 then begin ep:=ep+1;v:=inkey end
    else err:=1;ev:=v end
 else if lev=1 then begin
    if tb[ep]=TP+1 then begin ep:=ep+1;p_expr(1);ev:=0-ev end

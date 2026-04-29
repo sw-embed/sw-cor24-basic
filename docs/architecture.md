@@ -135,16 +135,17 @@ and strings:
 
 | Token Type | Encoding | Description |
 |------------|----------|-------------|
-| Keyword | `0x80-0x9F` | PRINT, IF, GOTO, etc. |
-| Operator | `0xA0-0xAF` | +, -, *, /, =, <>, etc. |
-| Delimiter | `0xB0-0xB7` | (, ), comma, semicolon |
+| Keyword | `0x80-0xAF` | PRINT, IF, GOTO, INKEY, etc. |
+| Delimiter | `0xB0-0xB3` | (, ), comma, semicolon |
+| Operator | `0xB4-0xBD` | +, -, *, /, =, <>, etc. |
 | Variable | `0xC0-0xD9` | A=0xC0, B=0xC1, ... Z=0xD9 |
 | Integer literal | `0xE0` + 3 bytes | 24-bit value follows |
 | String literal | `0xE1` + len + bytes | Length-prefixed string |
 | End of line | `0x00` | Terminator |
 
 Keywords, operators, and delimiters are single-byte tokens.
-This makes scanning fast and storage compact.
+The keyword range intentionally reserves 48 slots so new builtins can be
+added without colliding with delimiter, operator, or variable tokens.
 
 ## 5. Execution Flow
 
@@ -215,6 +216,7 @@ switch first_token:
 |-----------------|-------------|
 | PRINT character | `sys 1` (PUTC) |
 | INPUT character | `sys 2` (GETC) |
+| INKEY poll | `sys 9` (INKEY) |
 | LED control | `sys 3` (LED) |
 
 ### 6.2 Memory Access

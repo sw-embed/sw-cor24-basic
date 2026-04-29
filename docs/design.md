@@ -20,7 +20,12 @@ Steps:
    - Emit token byte(s) to token buffer
 4. Emit end-of-line token (0x00)
 
-### 1.2 Keyword Tokens (0x80-0x9F)
+### 1.2 Keyword Tokens (0x80-0xAF)
+
+Keywords start at `0x80`. The token layout reserves `0x80-0xAF`
+for up to 48 keywords before delimiter, operator, and variable tokens.
+This reserve is intentional: adding `INKEY` exposed that a one- or
+two-token gap is too easy to exhaust.
 
 | Byte | Keyword |
 |------|---------|
@@ -42,8 +47,8 @@ Steps:
 | 0x8F | LIST |
 | 0x90 | RUN |
 | 0x91 | NEW |
-| 0x92 | SAVE |
-| 0x93 | LOAD |
+| 0x92 | AND |
+| 0x93 | OR |
 | 0x94 | BYE |
 | 0x95 | PEEK |
 | 0x96 | POKE |
@@ -61,6 +66,7 @@ Steps:
 | 0xA2 | SHL |
 | 0xA3 | SHR |
 | 0xA4 | CONT |
+| 0xA5 | INKEY |
 
 Keywords are case-insensitive. The tokenizer uppercases input before
 matching.
@@ -68,22 +74,11 @@ matching.
 After `REM`, the rest of the line is stored verbatim as a string token
 (for faithful listing).
 
-### 1.3 Operator Tokens (0xA0-0xAF)
+### 1.3 Delimiter Tokens (0xB0-0xB3)
 
-| Byte | Operator |
-|------|----------|
-| 0xA0 | `+` |
-| 0xA1 | `-` |
-| 0xA2 | `*` |
-| 0xA3 | `/` |
-| 0xA4 | `=` |
-| 0xA5 | `<>` |
-| 0xA6 | `<` |
-| 0xA7 | `<=` |
-| 0xA8 | `>` |
-| 0xA9 | `>=` |
-
-### 1.4 Delimiter Tokens (0xB0-0xB7)
+Delimiter tokens are fixed immediately after the keyword reserve. Keep
+them below the operator range so new keywords can be added up to
+`0xAF` without colliding with expression parsing.
 
 | Byte | Delimiter |
 |------|-----------|
@@ -91,6 +86,21 @@ After `REM`, the rest of the line is stored verbatim as a string token
 | 0xB1 | `)` |
 | 0xB2 | `,` |
 | 0xB3 | `;` |
+
+### 1.4 Operator Tokens (0xB4-0xBD)
+
+| Byte | Operator |
+|------|----------|
+| 0xB4 | `+` |
+| 0xB5 | `-` |
+| 0xB6 | `*` |
+| 0xB7 | `/` |
+| 0xB8 | `=` |
+| 0xB9 | `<>` |
+| 0xBA | `<` |
+| 0xBB | `<=` |
+| 0xBC | `>` |
+| 0xBD | `>=` |
 
 ### 1.5 Variable Tokens (0xC0-0xD9)
 

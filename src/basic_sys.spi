@@ -1,0 +1,3 @@
+;--- SPI basic_sys ---
+.export _user_inkey 0 1 0
+;--- END SPI ---

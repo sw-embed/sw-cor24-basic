@@ -1,0 +1,4 @@
+command = "./scripts/run-basic.sh tests/inkey/buffered.bas"
+timeout = 30
+exit_code = 0
+desc = "INKEY: consumes buffered bytes"

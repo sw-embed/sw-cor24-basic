@@ -1,1 +1,3 @@
 build/
+reg-rs/*.tdb
+reg-rs/*.tdb.lock
