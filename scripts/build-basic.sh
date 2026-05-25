@@ -18,12 +18,12 @@ trap "rm -rf $TMP" EXIT
 
 # Cache pre-assembled p24p
 if [ ! -f "$P24P_BIN" ] || [ "$P24P_S" -nt "$P24P_BIN" ]; then
-  cor24-run --assemble "$P24P_S" "$P24P_BIN" /dev/null 2>&1 | head -1
+  cor24-asm "$P24P_S" --bin "$P24P_BIN" 2>&1 | head -1
 fi
 
 echo "=== Compiling basic.pas ==="
 
-SPC_OUTPUT=$(cor24-run --load-binary "$P24P_BIN@0" --entry 0 --stack-kilobytes 8 \
+SPC_OUTPUT=$(cor24-emu --load-binary "$P24P_BIN@0" --entry 0 --stack-kilobytes 8 \
   -u "$(cat "$BASIC_SYS_SPI"; cat "$REPO_DIR/src/basic.pas")"$'\x04' \
   --speed 0 -n 2000000000 2>&1 | grep -v '^\[UART')
 
