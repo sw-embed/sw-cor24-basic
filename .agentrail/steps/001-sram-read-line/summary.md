@@ -1,0 +1,1 @@
+Added SRAM-based program input: rc() function reads chars from PEEK(0x040000+), switches to UART on NUL. Also fixed build scripts to use PATH tools, fixed format.sh (-Q flag, grep exit code), and fixed test scripts with hardcoded pv24t paths. All 49 regression tests pass. Verified SRAM loading works end-to-end with cor24-run --load-binary.

@@ -1,0 +1,1 @@
+Implement SRAM-based source reading in the BASIC interpreter. Add sp (source pointer = 262144) and sm (source mode = 1) globals. Modify read_line to read characters via peek(sp) when sm=1, advancing sp. On NUL byte (0), set sm=0 and switch permanently to UART input. Rebuild basic.p24 and verify existing tests still pass (zero at 0x040000 causes immediate UART fallback).
