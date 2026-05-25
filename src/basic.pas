@@ -1,8 +1,8 @@
 program Basic;
 const
    { Token layout: keywords use 128..175, leaving room for 48 keywords.
-     Delimiters stay at 176..179, operators use 180..189, and variables
-     start at 192. Keep future keyword additions below 176. }
+   Delimiters stay at 176..179, operators use 180..189, and variables
+   start at 192. Keep future keyword additions below 176. }
    FK=128;TP=180;TG=189;VA=192;TI=224;TS=225;KW=8;NK=38;PS=16384;AS=1024;
 var
    kt:array[0..303]of char;
@@ -24,7 +24,7 @@ var
    apool:array[0..1023]of integer;
    abase:array[0..25]of integer;
    asize:array[0..25]of integer;
-   gp,fp,col,pok,el,running,mi,dl,ds,apsp,ctl:integer;
+   gp,fp,col,pok,el,running,mi,dl,ds,apsp,ctl,sp,sm:integer;
 procedure ks(i:integer;a,b,c,d,e,f,g,h:char);
 var p:integer;
 begin p:=i*KW;kt[p]:=a;kt[p+1]:=b;kt[p+2]:=c;kt[p+3]:=d;kt[p+4]:=e;kt[p+5]:=f;kt[p+6]:=g;kt[p+7]:=h end;
@@ -128,8 +128,8 @@ begin if a<0 then a:=a+16777216;if b<0 then b:=b+16777216;
    while i<24 do begin
       ab:=(a div bt)mod 2;bb:=(b div bt)mod 2;
       if op=0 then begin if(ab=1)and(bb=1)then rv:=rv+bt end
-      else if op=1 then begin if(ab=1)or(bb=1)then rv:=rv+bt end
-      else begin if ab<>bb then rv:=rv+bt end;
+   else if op=1 then begin if(ab=1)or(bb=1)then rv:=rv+bt end
+   else begin if ab<>bb then rv:=rv+bt end;
       bt:=bt*2;i:=i+1 end;
    bitop:=rv end;
 procedure p_expr(lev:integer);
@@ -187,12 +187,12 @@ else if lev=5 then begin p_expr(4);v:=ev;
       else if op=FK+32 then v:=bitop(v,r,1)
       else if op=FK+33 then v:=bitop(v,r,2)
       else if op=FK+34 then begin i:=r;while i>0 do begin v:=v*2;i:=i-1 end end
-      else begin i:=r;while i>0 do begin v:=v div 2;i:=i-1 end end end;ev:=v end
+   else begin i:=r;while i>0 do begin v:=v div 2;i:=i-1 end end end;ev:=v end
 else begin p_expr(5);v:=ev;
    while(err=0)and((tb[ep]=FK+18)or(tb[ep]=FK+19))do begin
       op:=tb[ep];ep:=ep+1;p_expr(5);r:=ev;
       if op=FK+18 then begin if(v<>0)and(r<>0)then v:=1 else v:=0 end
-      else begin if(v<>0)or(r<>0)then v:=1 else v:=0 end end;ev:=v end
+   else begin if(v<>0)or(r<>0)then v:=1 else v:=0 end end;ev:=v end
 end;
 procedure pc(c:char);
 begin writechar(c);col:=col+1 end;
@@ -208,11 +208,17 @@ begin if n<0 then begin pc('-');n:=0-n end;
    if n=0 then pc('0')
    else begin nd:=0;while n>0 do begin pid[nd]:=n mod 10;nd:=nd+1;n:=n div 10 end;
       i:=nd-1;while i>=0 do begin pc(chr(pid[i]+48));i:=i-1 end end end;
+function rc:integer;
+var c:integer;
+begin
+   if sm=1 then begin c:=peek(sp);sp:=sp+1;
+      if c=0 then begin sm:=0;readln(c) end
+   end else readln(c);rc:=c end;
 procedure read_line;
 var c:integer;
-begin ll:=0;readln(c);
+begin ll:=0;c:=rc;
    while(c<>10)and(c<>13)and(c<>4)and(c<>29)and(c>=0)and(ll<80)do
-   begin lb[ll]:=chr(c);ll:=ll+1;readln(c) end;
+   begin lb[ll]:=chr(c);ll:=ll+1;c:=rc end;
    if(c=4)or(c=29)or(c<0)then begin pn;running:=0;ll:=0 end end;
 procedure pi;
 var i,n,s:integer;
@@ -235,7 +241,7 @@ begin dn:=0;nl:=1;
    else if tb[ep]=FK+24 then begin ep:=ep+1;
       if tb[ep]=176 then begin ep:=ep+1;p_expr(6);
 	 if(err=0)and(tb[ep]=177)then begin ep:=ep+1;pc(chr(ev)) end
-	 else if err=0 then err:=1
+      else if err=0 then err:=1
       end else err:=1 end
    else begin p_expr(6);if err=0 then print_int(ev) end;
       if err<>0 then dn:=1
@@ -256,7 +262,7 @@ begin if(tb[ep]>=VA)and(tb[ep]<=VA+25)then begin vi:=tb[ep]-VA;ep:=ep+1;
 	    else apool[abase[vi]+sub]:=ev end
       end else if err=0 then err:=1
    end else if tb[ep]=TP+4 then begin ep:=ep+1;p_expr(6);vars[vi]:=ev end
-   else err:=1
+else err:=1
 end else err:=1 end;
 procedure do_dim;
 var vi,sz,i:integer;done:boolean;
@@ -321,14 +327,14 @@ begin done:=false;if dl<0 then begin dl:=0;ds:=0 end;
       if ds=0 then begin
 	 while(dl<pe)and(ds=0)do begin
 	    if ord(pg[dl+3])=FK+25 then begin dl:=dl+4;ds:=1 end
-	    else dl:=dl+3+ord(pg[dl+2]) end;
+	 else dl:=dl+3+ord(pg[dl+2]) end;
 	 if ds=0 then err:=13
       end else begin b:=ord(pg[dl]);
 	 if b=0 then begin dl:=dl+1;ds:=0 end
       else if b=178 then dl:=dl+1
       else begin sgn:=1;
 	 if b=TP+1 then begin sgn:=-1;dl:=dl+1;b:=ord(pg[dl]) end
-	 else if b=TP then begin dl:=dl+1;b:=ord(pg[dl]) end;
+      else if b=TP then begin dl:=dl+1;b:=ord(pg[dl]) end;
 	 if b=TI then begin
 	    ln:=ord(pg[dl+1])*65536+ord(pg[dl+2])*256+ord(pg[dl+3]);
 	    vars[vi]:=sgn*ln;dl:=dl+4;done:=true
@@ -347,7 +353,7 @@ begin p_expr(6);idx:=ev;which:=-1;
 	    if err=0 then begin
 	       if n=idx then begin lnum:=ev;matched:=true end;
 	       if tb[ep]=178 then begin ep:=ep+1;n:=n+1 end
-	       else done:=true end end;
+	    else done:=true end end;
 	 if(err=0)and matched then begin
 	    if which=1 then begin
 	       if gp>=64 then err:=6
@@ -411,13 +417,13 @@ begin ep:=0;err:=0;rd:=1;
       if(tb[ep]>=VA)and(tb[ep]<=VA+25)then begin vi:=tb[ep]-VA;ep:=ep+1;data_read(vi);
 	 while(err=0)and(tb[ep]=178)do begin ep:=ep+1;
 	    if(tb[ep]>=VA)and(tb[ep]<=VA+25)then begin vi:=tb[ep]-VA;ep:=ep+1;data_read(vi) end
-	    else err:=1 end
+	 else err:=1 end
       end else err:=1 end
    else if t=FK+27 then begin ep:=ep+1;
       if tb[ep]=0 then begin dl:=-1;ds:=0 end
-      else begin p_expr(6);
-	 if err=0 then begin n:=store_find(ev);
-	    if n<0 then err:=3 else begin dl:=n;ds:=0 end end end end
+   else begin p_expr(6);
+      if err=0 then begin n:=store_find(ev);
+	 if n<0 then err:=3 else begin dl:=n;ds:=0 end end end end
    else if t=FK+28 then begin ep:=ep+1;do_dim end
    else if t=FK+29 then begin ep:=ep+1;do_on end
    else if t=FK+36 then begin
@@ -434,6 +440,7 @@ begin ep:=0;err:=0;rd:=1;
       if el>0 then begin write(' IN ');print_int(el) end;pn end end;
 begin
    ik;pe:=0;running:=1;mi:=0;gp:=0;fp:=0;col:=0;el:=0;dl:=-1;ds:=0;apsp:=0;ctl:=-1;
+   sp:=262144;sm:=1;
    ep:=0;while ep<26 do begin vars[ep]:=0;abase[ep]:=-1;asize[ep]:=0;ep:=ep+1 end;
    write('COR24 BASIC V1');pn;write('READY');pn;
    tl:=0;

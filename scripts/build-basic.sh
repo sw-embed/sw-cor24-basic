@@ -4,17 +4,13 @@ set -euo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
 REPO_DIR="$(cd "$SCRIPT_DIR/.." && pwd)"
-EMBED_DIR="$(cd "$REPO_DIR/.." && pwd)"
+LIBDIR="${LIBDIR:-/disk1/github/softwarewrighter/devgroup/work/lib}"
 
 P24P_BIN="$REPO_DIR/build/p24p.bin"
-P24P_S="$EMBED_DIR/sw-cor24-pascal/compiler/p24p.s"
-PL24R="$EMBED_DIR/sw-cor24-pcode/target/release/pl24r"
-PA24R="$EMBED_DIR/sw-cor24-pcode/target/release/pa24r"
-RUNTIME="$EMBED_DIR/sw-cor24-pascal/runtime/runtime.spc"
+P24P_S="$LIBDIR/pascal/p24p.s"
+RUNTIME="$LIBDIR/pascal/runtime.spc"
 BASIC_SYS_SPI="$REPO_DIR/src/basic_sys.spi"
 BASIC_SYS="$REPO_DIR/src/basic_sys.spc"
-EMU="$EMBED_DIR/sw-cor24-emulator/target/release/cor24-emu"
-if [ ! -x "$EMU" ]; then EMU="cor24-run"; fi
 
 mkdir -p "$REPO_DIR/build"
 TMP=$(mktemp -d)
@@ -27,7 +23,7 @@ fi
 
 echo "=== Compiling basic.pas ==="
 
-SPC_OUTPUT=$("$EMU" --load-binary "$P24P_BIN@0" --entry 0 --stack-kilobytes 8 \
+SPC_OUTPUT=$(cor24-run --load-binary "$P24P_BIN@0" --entry 0 --stack-kilobytes 8 \
   -u "$(cat "$BASIC_SYS_SPI"; cat "$REPO_DIR/src/basic.pas")"$'\x04' \
   --speed 0 -n 2000000000 2>&1 | grep -v '^\[UART')
 
@@ -45,17 +41,17 @@ echo "$SPC_OUTPUT" | sed 's/^UART output: //' | \
   sed -n '/^\.module/,/^\.endmodule/p' > "$TMP/basic.spc"
 echo "  .spc: $(wc -l < "$TMP/basic.spc") lines"
 
-"$PL24R" "$TMP/basic.spc" "$BASIC_SYS" "$RUNTIME" -o "$TMP/linked.spc" 2>/dev/null
+pl24r "$TMP/basic.spc" "$BASIC_SYS" "$RUNTIME" -o "$TMP/linked.spc" 2>/dev/null
 echo "  Linked"
 
-# Patch read_line: replace readln(c) with single-char GETC
+# Patch rc and read_line: replace readln(c) with single-char GETC
 # p24p emits readln(c) as: call _p24p_read_int + call _p24p_read_ln
 # We need: sys 2 (GETC, one char). Remove the read_ln call too.
-sed -i '' '/_user_read_line/,/\.end/{
+sed -i '/_user_rc\|_user_read_line/,/\.end/{
   s/call _p24p_read_int/sys 2/g
   /call _p24p_read_ln/d
 }' "$TMP/linked.spc"
-echo "  Patched read_line"
+echo "  Patched rc/read_line"
 
-"$PA24R" "$TMP/linked.spc" -o "$REPO_DIR/build/basic.p24" 2>&1
+pa24r "$TMP/linked.spc" -o "$REPO_DIR/build/basic.p24" 2>&1
 echo "=== Built: build/basic.p24 ==="

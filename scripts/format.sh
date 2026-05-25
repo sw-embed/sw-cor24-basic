@@ -17,9 +17,9 @@ fi
 
 for f in "${PAS_FILES[@]}"; do
   echo "Formatting $(basename "$f")"
-  emacs --batch "$f" \
+  emacs -Q --batch "$f" \
     --eval "(progn (pascal-mode) (indent-region (point-min) (point-max)) (save-buffer))" \
-    2>&1 | grep -v '^Indenting region'
+    2>&1 | { grep -v '^Indenting region' || true; }
 done
 
 echo "Done — formatted ${#PAS_FILES[@]} file(s)"
